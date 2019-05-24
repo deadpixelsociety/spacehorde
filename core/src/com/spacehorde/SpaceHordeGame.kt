@@ -2,21 +2,54 @@ package com.spacehorde
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.spacehorde.scene.SceneContainer
 import com.spacehorde.service.ServiceContainer
+import com.spacehorde.service.impl.SceneContainerProvider
 import com.spacehorde.service.impl.ShapeRendererProvider
 import com.spacehorde.service.impl.SpriteBatchProvider
+import com.spacehorde.service.registerService
+import com.spacehorde.service.service
 
 class SpaceHordeGame : ApplicationAdapter() {
+    companion object {
+        private const val DT = .01f
+        private const val MAX_DT = 1f / 60f
+    }
+
+    private val sceneContainer by service<SceneContainer>()
+    private var accumulator = 0f
+    private var tt = 0f
+
     override fun create() {
         Gdx.app.addLifecycleListener(ServiceContainer)
 
-        ServiceContainer.register(SpriteBatchProvider())
-        ServiceContainer.register(ShapeRendererProvider())
+        registerService(SpriteBatchProvider())
+        registerService(ShapeRendererProvider())
+        registerService(SceneContainerProvider())
+    }
+
+    override fun pause() {
+        sceneContainer.pause()
+    }
+
+    override fun resume() {
+        sceneContainer.resume()
+    }
+
+    override fun resize(width: Int, height: Int) {
+        sceneContainer.resize(width, height)
     }
 
     override fun render() {
-    }
+        val dt = Math.min(Gdx.graphics.deltaTime, MAX_DT)
+        accumulator += dt
 
-    override fun dispose() {
+        while (accumulator >= DT) {
+            sceneContainer.update(DT, tt)
+            accumulator -= DT
+            tt += DT
+        }
+
+        sceneContainer.draw()
     }
 }

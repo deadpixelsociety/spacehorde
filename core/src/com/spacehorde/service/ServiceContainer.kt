@@ -20,6 +20,7 @@ object ServiceContainer : LifecycleListener {
     fun <T> get(clazz: Class<T>): T {
         if (!serviceMap.containsKey(clazz)) throw Exception("Missing service provider for class ${clazz.name}")
         val service = serviceMap.get(clazz)
+        if (service is ServiceProvider<*>) return service.provide() as T
         return service as T
     }
 
