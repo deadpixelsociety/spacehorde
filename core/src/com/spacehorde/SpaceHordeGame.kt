@@ -3,6 +3,7 @@ package com.spacehorde
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
 import com.spacehorde.scene.SceneContainer
+import com.spacehorde.scene.impl.TestScene
 import com.spacehorde.service.ServiceContainer
 import com.spacehorde.service.impl.SceneContainerProvider
 import com.spacehorde.service.impl.ShapeRendererProvider
@@ -26,6 +27,8 @@ class SpaceHordeGame : ApplicationAdapter() {
         registerService(SpriteBatchProvider())
         registerService(ShapeRendererProvider())
         registerService(SceneContainerProvider())
+
+        sceneContainer.add(TestScene())
     }
 
     override fun pause() {
