@@ -7,39 +7,66 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.math.MathUtils
 import com.spacehorde.components.*
-import com.spacehorde.ships.PlayerShipMask
-import com.spacehorde.ships.ShipColor
-import com.spacehorde.ships.ShipMask
+import com.spacehorde.ships.*
 import com.spacehorde.usingWith
-import com.spacehorde.weapons.TwinBullet
+import com.spacehorde.weapons.SingleBullet
+import com.spacehorde.weapons.SmolBullet
 
 object Entities {
     fun createPlayerShip(x: Float, y: Float): Entity {
         val entity = createShip(x, y, PlayerShipMask(), MathUtils.random() * 360f)
-        //entity.add(component<Tag> { id = Tag.PLAYER })
         entity.add(component<GroupMask> { mask = GroupMask.PLAYERS })
-        entity.add(component<Weaponized> { add(TwinBullet()) })
+        entity.add(component<Weaponized> { add(SingleBullet()) })
+        entity.getComponent(Physics::class.java).apply {
+            maxSpeed = 300f
+            rotationSpeed = .075f
+            accelerationSpeed = 200f
+        }
+
+        return entity
+    }
+
+    fun createDiamondEnemy(x: Float, y: Float): Entity {
+        val entity = createShip(x, y, DiamondShipMask(), 180f)
+        entity.add(component<GroupMask> { mask = GroupMask.ENEMIES })
+        entity.add(component<Weaponized> { add(SingleBullet()) })
+        entity.getComponent(Physics::class.java).apply {
+            maxSpeed = 300f
+            rotationSpeed = .075f
+            accelerationSpeed = 200f
+        }
+
+        return entity
+    }
+
+    fun createSmolEnemy(x: Float, y: Float): Entity {
+        val entity = createShip(x, y, SmolShipMask(), 90f)
+        entity.add(component<GroupMask> { mask = GroupMask.ENEMIES })
+        entity.add(component<Weaponized> { add(SmolBullet()) })
+        entity.getComponent(Physics::class.java).apply {
+            maxSpeed = 300f
+            rotationSpeed = .075f
+            accelerationSpeed = 200f
+        }
+
         return entity
     }
 
     private fun createShip(x: Float, y: Float, shipMask: ShipMask, shipHue: Float): Entity {
         val entity = Entity()
 
+        entity.add(component<Spatial>())
         entity.add(component<Transform> {
             position.set(x, y)
-            origin.set(8f, 8f)
+            origin.set(shipMask.width.toFloat(), shipMask.height * .5f)
         })
 
         entity.add(component<Size> {
-            width = 16f
-            height = 16f
+            width = shipMask.width * 2f
+            height = shipMask.height.toFloat()
         })
 
-        entity.add(component<Physics> {
-            maxSpeed = 300f
-            rotationSpeed = .075f
-            accelerationSpeed = 200f
-        })
+        entity.add(component<Physics>())
 
         val shipColor = ShipColor(shipHue)
         entity.add(component<Meta> {

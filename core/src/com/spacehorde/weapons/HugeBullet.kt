@@ -48,6 +48,7 @@ class HugeBullet : WeaponDefImpl() {
     private fun createBullet(x: Float, y: Float, bulletColor: Color): Entity {
         val entity = Entity()
 
+        entity.add(component<Spatial>())
         entity.add(component<Transform> {
             position.set(x, y)
             origin.set(BULLET_SIZE * .5f, BULLET_SIZE * .5f)

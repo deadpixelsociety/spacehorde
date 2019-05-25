@@ -11,6 +11,8 @@ class GroupMask : PoolableComponent() {
 
     var mask = INVALID
 
+    fun has(id: Int) = mask.and(id) == id
+
     override fun reset() {
         mask = INVALID
     }

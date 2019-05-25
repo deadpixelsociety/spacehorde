@@ -12,7 +12,7 @@ import com.spacehorde.service.impl.ShapeRendererProvider
 import com.spacehorde.service.impl.SpriteBatchProvider
 import com.spacehorde.service.registerService
 import com.spacehorde.service.service
-import com.spacehorde.states.TestScene
+import com.spacehorde.scene.impl.TestScene
 
 class SpaceHordeGame : ApplicationAdapter() {
     companion object {

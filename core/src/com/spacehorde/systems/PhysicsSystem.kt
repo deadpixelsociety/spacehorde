@@ -1,6 +1,5 @@
 package com.spacehorde.systems
 
-import com.badlogic.ashley.core.ComponentMapper
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntityListener
 import com.badlogic.ashley.core.Family
@@ -8,14 +7,15 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.math.Vector2
 import com.spacehorde.components.Physics
 import com.spacehorde.components.Transform
+import com.spacehorde.components.mapper
 
 class PhysicsSystem : IteratingSystem(Family.all(Transform::class.java, Physics::class.java).get()), EntityListener {
     companion object {
         const val FRICTION = .985f
     }
 
-    private val transformMapper by lazy { ComponentMapper.getFor(Transform::class.java) }
-    private val physicsMapper by lazy { ComponentMapper.getFor(Physics::class.java) }
+    private val transformMapper by mapper<Transform>()
+    private val physicsMapper by mapper<Physics>()
     private val v0 = Vector2()
 
     override fun entityRemoved(entity: Entity?) {

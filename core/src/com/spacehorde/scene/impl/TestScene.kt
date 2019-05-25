@@ -1,4 +1,4 @@
-package com.spacehorde.states
+package com.spacehorde.scene.impl
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.gdx.Gdx
@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.spacehorde.SpaceHordeGame
 import com.spacehorde.entities.Entities
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneImpl
@@ -21,10 +22,7 @@ class TestScene : SceneImpl() {
 
     override fun create() {
         createSystems()
-        engine.addEntity(Entities.createPlayerShip(0f, 0f))
-        engine.addEntity(Entities.createPlayerShip(20f, 0f))
-        engine.addEntity(Entities.createPlayerShip(-20f, 0f))
-        engine.addEntity(Entities.createPlayerShip(0f, -20f))
+        engine.addEntity(Entities.createPlayerShip(250f, 250f))
     }
 
     private fun createSystems() {
@@ -33,7 +31,9 @@ class TestScene : SceneImpl() {
         engine.addSystem(ControlSystem())
         engine.addSystem(ScriptSystem())
         engine.addSystem(PhysicsSystem())
+        engine.addSystem(SpatialSystem(500f, 500f))
         engine.addSystem(RenderSystem(viewport.camera))
+        if (SpaceHordeGame.DEBUG) engine.addSystem(DebugRenderSystem(viewport.camera))
     }
 
     override fun resize(width: Int, height: Int) {
@@ -53,8 +53,11 @@ class TestScene : SceneImpl() {
         Gdx.gl.glClearColor(.05f, .05f, .05f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
+        viewport.camera.position.set(250f, 250f, 0f)
+
         viewport.apply()
         engine.getSystem(RenderSystem::class.java)?.update(dt)
+        if (SpaceHordeGame.DEBUG) engine.getSystem(DebugRenderSystem::class.java)?.update(dt)
 
         renderUI()
     }

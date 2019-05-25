@@ -121,13 +121,14 @@ open class ShipMask {
         val data = maskFile.readString()
         val lines = data.split("\n")
 
-        width = lines[0].length
+        width = lines[0].trim().length
         height = lines.size
 
         cells = Array(height) { IntArray(width) { Cell.EMPTY.value } }
 
         for (y in 0 until lines.size) {
-            val line = lines[y]
+            val line = lines[y].trim()
+            if (line.isEmpty()) continue
             for (x in 0 until line.length) {
                 set(x, y, Cell.byValue(line[x].toString().toInt()))
             }
