@@ -6,50 +6,18 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.math.MathUtils
-import com.spacehorde.assets.asset
 import com.spacehorde.components.*
-import com.spacehorde.scripts.Rotate
 import com.spacehorde.ships.PlayerShipMask
 import com.spacehorde.ships.ShipColor
 import com.spacehorde.ships.ShipMask
 import com.spacehorde.usingWith
+import com.spacehorde.weapons.SingleBullet
 
 object Entities {
-    private val bulletTexture by asset<Texture>("textures/bullet.png")
-
     fun createPlayerShip(x: Float, y: Float): Entity {
         val entity = createShip(x, y, PlayerShipMask(), MathUtils.random() * 360f)
         entity.add(component<Tag> { id = Tag.PLAYER })
-        return entity
-    }
-
-    fun createBullet(x: Float, y: Float, bulletColor: Color): Entity {
-        val entity = Entity()
-
-        entity.add(component<Transform> {
-            position.set(x, y)
-            origin.set(2.5f, 2.5f)
-        })
-
-        entity.add(component<Size> {
-            width = 5f
-            height = 5f
-        })
-
-        entity.add(component<Physics> {
-            maxSpeed = 500f
-            rotationSpeed = 1f / 540f
-            accelerationSpeed = 250f
-            frictionless = true
-        })
-
-        entity.add(component<GroupMask> { mask = GroupMask.BULLETS })
-        entity.add(component<Tint> { color.set(bulletColor) })
-        entity.add(component<RenderSprite> { sprite = Sprite(bulletTexture) })
-        entity.add(component<Scripted> {
-            scripts.add(Rotate(540f))
-        })
-
+        entity.add(component<Weaponized> { add(SingleBullet()) })
         return entity
     }
 
