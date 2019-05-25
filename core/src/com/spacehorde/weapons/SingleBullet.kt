@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2
 import com.spacehorde.assets.asset
 import com.spacehorde.components.*
 import com.spacehorde.scripts.Rotate
+import com.spacehorde.scripts.impl.BulletScript
 import com.spacehorde.ships.ShipColor
 
 class SingleBullet : WeaponDefImpl() {
@@ -49,6 +50,7 @@ class SingleBullet : WeaponDefImpl() {
         val entity = Entity()
 
         entity.add(component<Spatial>())
+        entity.add(component<Collision> { mask = GroupMask.ENEMIES.or(GroupMask.WALLS) })
         entity.add(component<Transform> {
             position.set(x, y)
             origin.set(BULLET_SIZE * .5f, BULLET_SIZE * .5f)
@@ -71,6 +73,7 @@ class SingleBullet : WeaponDefImpl() {
         entity.add(component<RenderSprite> { sprite = Sprite(bulletTexture) })
         entity.add(component<Scripted> {
             scripts.add(Rotate(BULLET_ROTATION_PER_SECOND))
+            scripts.add(BulletScript())
         })
 
         return entity

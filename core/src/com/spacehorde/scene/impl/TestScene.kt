@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.spacehorde.SpaceHordeGame
+import com.spacehorde.components.GroupMask
+import com.spacehorde.components.Transform
+import com.spacehorde.components.mapper
 import com.spacehorde.entities.Entities
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneImpl
@@ -16,21 +19,31 @@ import com.spacehorde.systems.*
 
 class TestScene : SceneImpl() {
     private val engine = Engine()
-    private val viewport by lazy { FillViewport(450f, 450f) }
+    private val viewport by lazy { FillViewport(600f, 600f) }
     private val uiViewport by lazy { ScreenViewport() }
     private val batch by service<SpriteBatch>()
+    private val groupMapper by mapper<GroupMask>()
+    private val transformMapper by mapper<Transform>()
 
     override fun create() {
         createSystems()
+        engine.addEntity(Entities.createWall(0f, 0f, 4f, 525f))
+        engine.addEntity(Entities.createWall(521f, 00f, 4f, 525f))
+        engine.addEntity(Entities.createWall(4f, 521f, 517f, 4f))
+        engine.addEntity(Entities.createWall(4f, 0f, 517f, 4f))
+
         engine.addEntity(Entities.createPlayerShip(250f, 250f))
+        engine.addEntity(Entities.createDiamondEnemy(300f, 250f))
     }
 
     private fun createSystems() {
         engine.addSystem(TagSystem())
         engine.addSystem(GroupSystem())
+        engine.addSystem(GraveyardSystem())
         engine.addSystem(ControlSystem())
         engine.addSystem(ScriptSystem())
         engine.addSystem(PhysicsSystem())
+        engine.addSystem(CollisionSystem())
         engine.addSystem(SpatialSystem(500f, 500f))
         engine.addSystem(RenderSystem(viewport.camera))
         if (SpaceHordeGame.DEBUG) engine.addSystem(DebugRenderSystem(viewport.camera))
@@ -53,7 +66,20 @@ class TestScene : SceneImpl() {
         Gdx.gl.glClearColor(.05f, .05f, .05f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        viewport.camera.position.set(250f, 250f, 0f)
+        val players = engine.getSystem(GroupSystem::class.java)[GroupMask.PLAYERS]
+        var px = 0f
+        var py = 0f
+
+        players.forEach {
+            val transform = transformMapper.get(it)
+            px += transform.position.x
+            py += transform.position.y
+        }
+
+        px /= players.size.toFloat()
+        py /= players.size.toFloat()
+
+        viewport.camera.position.set(px, py, 0f)
 
         viewport.apply()
         engine.getSystem(RenderSystem::class.java)?.update(dt)

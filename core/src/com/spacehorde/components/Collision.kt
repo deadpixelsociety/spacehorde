@@ -5,7 +5,7 @@ import com.badlogic.ashley.core.Entity
 class Collision : PoolableComponent() {
     var collision = false
     var collided: Entity? = null
-    var mask = 0
+    var mask = GroupMask.INVALID
 
     override fun reset() {
         collision = false

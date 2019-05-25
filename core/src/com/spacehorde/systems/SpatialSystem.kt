@@ -71,6 +71,8 @@ class SpatialSystem(val width: Float, val height: Float)
             if (withinBounds(nx, ny)) list.addAll(cells[ny][nx])
         }
 
+        list.remove(entity)
+
         return list
     }
 
