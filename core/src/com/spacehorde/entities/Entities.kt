@@ -34,7 +34,7 @@ object Entities {
                 height = SHIP_HEIGHT.toFloat()
         ))
 
-        entity.add(Physics(maxSpeed = 100f))
+        entity.add(Physics(maxSpeed = 300f))
         entity.add(Tint())
         entity.add(RenderSprite(createShipSprite(shipMask)))
 

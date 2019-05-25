@@ -15,7 +15,7 @@ import com.spacehorde.systems.*
 
 class TestScene : SceneImpl() {
     private val engine = Engine()
-    private val viewport by lazy { FillViewport(640f, 640f) }
+    private val viewport by lazy { FillViewport(450f, 450f) }
     private val uiViewport by lazy { ScreenViewport() }
     private val batch by service<SpriteBatch>()
 

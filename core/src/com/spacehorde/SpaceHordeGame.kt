@@ -2,6 +2,7 @@ package com.spacehorde
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneContainer
 import com.spacehorde.service.ServiceContainer
@@ -31,6 +32,7 @@ class SpaceHordeGame : ApplicationAdapter() {
         registerService(SpriteBatchProvider())
         registerService(ShapeRendererProvider())
         registerService(SceneContainerProvider())
+        registerService(CustomControllerMappings())
 
         sceneContainer.add(TestScene())
     }

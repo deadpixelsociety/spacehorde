@@ -42,6 +42,8 @@ class PhysicsSystem : IteratingSystem(Family.all(Transform::class.java, Physics:
         v0.set(physics.acceleration).scl(deltaTime)
         physics.velocity.add(v0)
 
+        println("accel $v0, vel ${physics.velocity}, speed ${physics.velocity.len()}")
+
         if (physics.velocity.len() > physics.maxSpeed) {
             physics.velocity.nor().scl(physics.maxSpeed)
         }
