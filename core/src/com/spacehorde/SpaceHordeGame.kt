@@ -16,6 +16,8 @@ import com.spacehorde.states.TestScene
 
 class SpaceHordeGame : ApplicationAdapter() {
     companion object {
+        var DEBUG = true
+
         private const val DT = .01f
         private const val MAX_DT = 1f / 60f
     }

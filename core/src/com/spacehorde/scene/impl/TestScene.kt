@@ -28,6 +28,7 @@ class TestScene : SceneImpl() {
         engine.addSystem(TagSystem())
         engine.addSystem(GroupSystem())
         engine.addSystem(ControlSystem())
+        engine.addSystem(ScriptSystem())
         engine.addSystem(PhysicsSystem())
         engine.addSystem(RenderSystem(viewport.camera))
     }

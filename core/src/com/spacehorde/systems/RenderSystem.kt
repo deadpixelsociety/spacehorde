@@ -9,15 +9,12 @@ import com.badlogic.gdx.graphics.GL30
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
+import com.spacehorde.SpaceHordeGame
 import com.spacehorde.components.*
 import com.spacehorde.service.service
 
 class RenderSystem(private val camera: Camera)
     : IteratingSystem(Family.all(Transform::class.java).one(RenderSprite::class.java).get()) {
-
-    companion object {
-        private const val DEBUG = true
-    }
 
     private val spriteMapper by mapper<RenderSprite>()
     private val tintMapper by mapper<Tint>()
@@ -36,7 +33,7 @@ class RenderSystem(private val camera: Camera)
         super.update(deltaTime)
         end()
 
-        if (DEBUG) {
+        if (SpaceHordeGame.DEBUG) {
             renderDebug = true
             beginDebug()
             super.update(deltaTime)

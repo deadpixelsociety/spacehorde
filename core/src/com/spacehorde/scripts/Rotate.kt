@@ -24,7 +24,7 @@ class Rotate() : DurationScript() {
 
     override fun step(deltaTime: Float, engine: Engine, entity: Entity) {
         val transform = transformMapper[entity] ?: return
-        transform.angle += amount * deltaTime
+        transform.angle += (amount * deltaTime) % 360f
     }
 
     override fun reset() {

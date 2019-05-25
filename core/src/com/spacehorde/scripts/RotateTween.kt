@@ -41,7 +41,7 @@ class RotateTween() : TweenScript<Float>() {
 
     override fun updateValue(engine: Engine, entity: Entity, value: Float) {
         val transform = transformMapper[entity] ?: return
-        transform.angle = value
+        transform.angle = value % 360f
     }
 
     override fun reset() {

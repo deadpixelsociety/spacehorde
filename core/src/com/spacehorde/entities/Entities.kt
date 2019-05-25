@@ -8,9 +8,9 @@ import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.math.MathUtils
 import com.spacehorde.assets.asset
 import com.spacehorde.components.*
-import com.spacehorde.graphics.HSB
-import com.spacehorde.graphics.toColor
+import com.spacehorde.scripts.Rotate
 import com.spacehorde.ships.PlayerShipMask
+import com.spacehorde.ships.ShipColor
 import com.spacehorde.ships.ShipMask
 import com.spacehorde.usingWith
 
@@ -18,18 +18,17 @@ object Entities {
     private val bulletTexture by asset<Texture>("textures/bullet.png")
 
     fun createPlayerShip(x: Float, y: Float): Entity {
-        val entity = createShip(x, y, PlayerShipMask())
+        val entity = createShip(x, y, PlayerShipMask(), MathUtils.random() * 360f)
         entity.add(component<Tag> { id = Tag.PLAYER })
         return entity
     }
 
-    fun createBullet(x: Float, y: Float): Entity {
+    fun createBullet(x: Float, y: Float, bulletColor: Color): Entity {
         val entity = Entity()
 
         entity.add(component<Transform> {
             position.set(x, y)
             origin.set(2.5f, 2.5f)
-            scale.set(3f, 3f)
         })
 
         entity.add(component<Size> {
@@ -38,20 +37,23 @@ object Entities {
         })
 
         entity.add(component<Physics> {
-            maxSpeed = 800f
-            rotationSpeed = .05f
-            accelerationSpeed = 400f
+            maxSpeed = 500f
+            rotationSpeed = 1f / 540f
+            accelerationSpeed = 250f
             frictionless = true
         })
 
         entity.add(component<GroupMask> { mask = GroupMask.BULLETS })
-        entity.add(component<Tint>())
+        entity.add(component<Tint> { color.set(bulletColor) })
         entity.add(component<RenderSprite> { sprite = Sprite(bulletTexture) })
+        entity.add(component<Scripted> {
+            scripts.add(Rotate(540f))
+        })
 
         return entity
     }
 
-    private fun createShip(x: Float, y: Float, shipMask: ShipMask): Entity {
+    private fun createShip(x: Float, y: Float, shipMask: ShipMask, shipHue: Float): Entity {
         val entity = Entity()
 
         entity.add(component<Transform> {
@@ -70,19 +72,19 @@ object Entities {
             accelerationSpeed = 200f
         })
 
+        val shipColor = ShipColor(shipHue)
+        entity.add(component<Meta> {
+            put("ShipColor", shipColor)
+        })
+
         entity.add(component<Tint>())
-        entity.add(component<RenderSprite> { sprite = createShipSprite(shipMask) })
+        entity.add(component<RenderSprite> { sprite = createShipSprite(shipMask, shipColor) })
 
         return entity
     }
 
-    private fun createShipSprite(shipMask: ShipMask): Sprite {
+    private fun createShipSprite(shipMask: ShipMask, shipColor: ShipColor): Sprite {
         val randomMask = shipMask.generateRandomFullMask()
-
-        val cockpitHue = MathUtils.random() * 360f
-        val cockpitColor = HSB(cockpitHue, .6f, 1f).toColor()
-        val bodyColor = HSB(0f, 0f, .95f).toColor()
-        val hullColor = HSB(cockpitHue, .8f, .6f).toColor()
 
         return Pixmap(shipMask.width * 2, shipMask.height, Pixmap.Format.RGBA8888).usingWith {
             for (y in 0 until shipMask.width * 2) {
@@ -91,9 +93,9 @@ object Entities {
 
                     it.setColor(when (cell) {
                         ShipMask.Cell.EMPTY -> Color.CLEAR
-                        ShipMask.Cell.BODY -> bodyColor
-                        ShipMask.Cell.COCKPIT -> cockpitColor
-                        ShipMask.Cell.HULL -> hullColor
+                        ShipMask.Cell.BODY -> shipColor.bodyColor
+                        ShipMask.Cell.COCKPIT -> shipColor.cockpitColor
+                        ShipMask.Cell.HULL -> shipColor.hullColor
                     })
 
                     it.drawPixel(x, y)
