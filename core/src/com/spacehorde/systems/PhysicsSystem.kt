@@ -35,14 +35,12 @@ class PhysicsSystem : IteratingSystem(Family.all(Transform::class.java, Physics:
     }
 
     private fun updateHeading(transform: Transform) {
-        transform.heading.set(v0.set(0f, 1f).rotate(transform.rotation))
+        transform.heading.set(v0.set(0f, 1f).rotate(transform.angle))
     }
 
     private fun integrate(deltaTime: Float, physics: Physics, transform: Transform) {
         v0.set(physics.acceleration).scl(deltaTime)
         physics.velocity.add(v0)
-
-        println("accel $v0, vel ${physics.velocity}, speed ${physics.velocity.len()}")
 
         if (physics.velocity.len() > physics.maxSpeed) {
             physics.velocity.nor().scl(physics.maxSpeed)

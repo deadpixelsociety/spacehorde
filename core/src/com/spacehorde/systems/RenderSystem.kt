@@ -44,9 +44,9 @@ class RenderSystem(private val camera: Camera)
         val render = spriteMapper.get(entity) ?: return
         val tint = tintMapper.get(entity)?.color ?: Color.WHITE
 
-        render.sprite.apply {
+        render.sprite?.apply {
             setOrigin(transform.origin.x, transform.origin.y)
-            rotation = transform.rotation
+            rotation = transform.angle
             setScale(transform.scale.x, transform.scale.y)
             setPosition(transform.position.x, transform.position.y)
             setColor(tint.r, tint.g, tint.b, tint.a)

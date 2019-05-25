@@ -1,34 +1,28 @@
 package com.spacehorde.systems
 
-import com.badlogic.ashley.core.*
+import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.Family
 import com.badlogic.gdx.utils.ObjectMap
 import com.spacehorde.components.Tag
+import com.spacehorde.components.mapper
 
-class TagSystem : EntitySystem(), EntityListener {
-    private val tagMapper by lazy { ComponentMapper.getFor(Tag::class.java) }
-    private val tagMap = ObjectMap<String, Entity>()
+class TagSystem : ContainerSystem(Family.all(Tag::class.java).get()) {
+    private val entityMap = ObjectMap<String, Entity>()
+    private val tagMapper by mapper<Tag>()
 
-    operator fun get(name: String): Entity? = tagMap.get(name, null)
+    fun getSafe(id: String): Entity? = entityMap[id, null]
 
-    override fun addedToEngine(engine: Engine?) {
-        super.addedToEngine(engine)
-        engine?.addEntityListener(Family.all(Tag::class.java).get(), this)
+    operator fun get(id: String) = entityMap[id, null] ?: throw IllegalArgumentException("Invalid entity tag ID.")
+
+    override fun onEntityAdded(entity: Entity) {
+        val tag = tagMapper[entity] ?: return
+        if (tag.id == Tag.INVALID) return
+        entityMap.put(tag.id, entity)
     }
 
-    override fun removedFromEngine(engine: Engine?) {
-        super.removedFromEngine(engine)
-        engine?.removeEntityListener(this)
-    }
-
-    override fun entityRemoved(entity: Entity?) {
-        if (entity == null) return
-        val tag = tagMapper.get(entity) ?: return
-        tagMap.remove(tag.name)
-    }
-
-    override fun entityAdded(entity: Entity?) {
-        if (entity == null) return
-        val tag = tagMapper.get(entity) ?: return
-        tagMap.put(tag.name, entity)
+    override fun onEntityRemoved(entity: Entity) {
+        val tag = tagMapper[entity] ?: return
+        if (tag.id == Tag.INVALID) return
+        entityMap.remove(tag.id)
     }
 }

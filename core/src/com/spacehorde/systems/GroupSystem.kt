@@ -1,44 +1,52 @@
 package com.spacehorde.systems
 
-import com.badlogic.ashley.core.*
-import com.badlogic.gdx.utils.ObjectMap
-import com.spacehorde.components.Group
+import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.Family
+import com.badlogic.gdx.utils.Array
+import com.badlogic.gdx.utils.IntMap
+import com.spacehorde.components.GroupMask
+import com.spacehorde.components.mapper
+import com.spacehorde.gdxArray
 
-class GroupSystem : EntitySystem(), EntityListener {
-    private val groupMapper by lazy { ComponentMapper.getFor(Group::class.java) }
-    private val groupMap = ObjectMap<String, com.badlogic.gdx.utils.Array<Entity>>()
+class GroupSystem : ContainerSystem(Family.all(GroupMask::class.java).get()) {
+    private val entityMap = IntMap<Array<Entity>>()
+    private val groupMapper by mapper<GroupMask>()
 
-    fun get(name: String): List<Entity> = getInner(name).toList()
-
-    private fun getInner(name: String): com.badlogic.gdx.utils.Array<Entity> {
-        var entities = groupMap.get(name, null)
-        if (entities == null) {
-            entities = com.badlogic.gdx.utils.Array()
-            groupMap.put(name, entities)
+    operator fun get(mask: Int): List<Entity> {
+        val list = arrayListOf<Entity>()
+        entityMap.forEach {
+            val id = it.key
+            if (mask and id == id) list.addAll(getInner(id))
         }
 
-        return entities
+        return list
     }
 
-    override fun addedToEngine(engine: Engine?) {
-        super.addedToEngine(engine)
-        engine?.addEntityListener(Family.all(Group::class.java).get(), this)
+    private fun getInner(id: Int): Array<Entity> {
+        var array = entityMap.get(id)
+        if (array == null) {
+            array = gdxArray()
+            entityMap.put(id, array)
+        }
+
+        return array
     }
 
-    override fun removedFromEngine(engine: Engine?) {
-        super.removedFromEngine(engine)
-        engine?.removeEntityListener(this)
+    override fun onEntityAdded(entity: Entity) {
+        val group = groupMapper[entity] ?: return
+        if (group.mask == GroupMask.INVALID) return
+        for (i in 0..31) {
+            val id = 1 shl i
+            if (group.mask and id == id) getInner(id).add(entity)
+        }
     }
 
-    override fun entityRemoved(entity: Entity?) {
-        if (entity == null) return
-        val group = groupMapper.get(entity) ?: return
-        getInner(group.name).removeValue(entity, true)
-    }
-
-    override fun entityAdded(entity: Entity?) {
-        if (entity == null) return
-        val group = groupMapper.get(entity) ?: return
-        getInner(group.name).add(entity)
+    override fun onEntityRemoved(entity: Entity) {
+        val group = groupMapper[entity] ?: return
+        if (group.mask == GroupMask.INVALID) return
+        for (i in 0..31) {
+            val id = 1 shl i
+            if (group.mask and id == id) getInner(id).removeValue(entity, true)
+        }
     }
 }

@@ -1,11 +1,18 @@
 package com.spacehorde.components
 
-import com.badlogic.ashley.core.Component
 import com.badlogic.gdx.math.Vector2
 
-data class Physics(
-    val velocity: Vector2 = Vector2(),
-    val acceleration: Vector2 = Vector2(),
-    var maxSpeed: Float = 0f,
-    var rotationSpeed: Float = 0f
-) : Component
+class Physics : PoolableComponent() {
+    val velocity: Vector2 = Vector2()
+    val acceleration: Vector2 = Vector2()
+    var maxSpeed = 0f
+    var rotationSpeed = 0f
+    var accelerationSpeed = 0f
+
+    override fun reset() {
+        velocity.set(0f, 0f)
+        acceleration.set(0f, 0f)
+        maxSpeed = 0f
+        rotationSpeed = 0f
+    }
+}

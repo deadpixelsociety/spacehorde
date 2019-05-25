@@ -7,17 +7,15 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Quaternion
 import com.badlogic.gdx.math.Vector2
 import com.spacehorde.components.Physics
+import com.spacehorde.components.Tag
 import com.spacehorde.components.Transform
 import com.spacehorde.config.CustomControllerMappings
-import com.spacehorde.entities.Tags
 import com.spacehorde.service.service
 import de.golfgl.gdx.controllers.mapping.MappedController
 
 class ControlSystem : EntitySystem() {
     companion object {
         private const val DEADZONE = .25f
-        private const val TURN_SPEED = .075f
-        private const val ACCELERATION = 300f
     }
 
     private val physicsMapper by lazy { ComponentMapper.getFor(Physics::class.java) }
@@ -31,7 +29,7 @@ class ControlSystem : EntitySystem() {
 
     override fun update(deltaTime: Float) {
         val tagSystem = engine?.getSystem(TagSystem::class.java) ?: return
-        val player = tagSystem[Tags.PLAYER] ?: return
+        val player = tagSystem[Tag.PLAYER]
         val physics = physicsMapper.get(player) ?: return
         val transform = transformMapper.get(player) ?: return
 
@@ -46,12 +44,12 @@ class ControlSystem : EntitySystem() {
             else movementAxis.set(movementAxis.nor().scl((magnitude - DEADZONE) / (1 - DEADZONE)))
 
             if (movementAxis.len() > 0) {
-                q0.setFromAxis(0f, 0f, 1f, transform.rotation)
+                q0.setFromAxis(0f, 0f, 1f, transform.angle)
                 val angle = (MathUtils.atan2(movementAxis.x, movementAxis.y) * MathUtils.radiansToDegrees) + 180f
                 q1.setFromAxis(0f, 0f, 1f, angle)
-                q0.slerp(q1, TURN_SPEED)
-                transform.rotation = q0.getAngleAround(0f, 0f, 1f)
-                physics.acceleration.set(v0.set(0f, 1f).rotate(transform.rotation).scl(ACCELERATION))
+                q0.slerp(q1, physics.rotationSpeed)
+                transform.angle = q0.getAngleAround(0f, 0f, 1f)
+                physics.acceleration.set(v0.set(0f, 1f).rotate(transform.angle).scl(physics.accelerationSpeed))
             } else {
                 physics.acceleration.set(0f, 0f)
             }

@@ -1,5 +1,14 @@
 package com.spacehorde.components
 
-import com.badlogic.ashley.core.Component
+class Tag : PoolableComponent() {
+    companion object {
+        const val INVALID = ""
+        const val PLAYER = "PLAYER"
+    }
 
-data class Tag(val name: String) : Component
+    var id = INVALID
+
+    override fun reset() {
+        id = INVALID
+    }
+}
