@@ -15,7 +15,7 @@ abstract class SceneImpl : Scene {
     override fun resume() {
     }
 
-    override fun draw() {
+    override fun draw(dt: Float, tt: Float) {
     }
 
     override fun update(dt: Float, tt: Float) {

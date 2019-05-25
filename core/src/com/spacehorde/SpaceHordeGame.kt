@@ -2,14 +2,15 @@ package com.spacehorde
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneContainer
-import com.spacehorde.scene.impl.TestScene
 import com.spacehorde.service.ServiceContainer
 import com.spacehorde.service.impl.SceneContainerProvider
 import com.spacehorde.service.impl.ShapeRendererProvider
 import com.spacehorde.service.impl.SpriteBatchProvider
 import com.spacehorde.service.registerService
 import com.spacehorde.service.service
+import com.spacehorde.states.TestScene
 
 class SpaceHordeGame : ApplicationAdapter() {
     companion object {
@@ -23,6 +24,9 @@ class SpaceHordeGame : ApplicationAdapter() {
 
     override fun create() {
         Gdx.app.addLifecycleListener(ServiceContainer)
+        Gdx.app.addLifecycleListener(Fonts)
+
+        Fonts.load()
 
         registerService(SpriteBatchProvider())
         registerService(ShapeRendererProvider())
@@ -44,7 +48,8 @@ class SpaceHordeGame : ApplicationAdapter() {
     }
 
     override fun render() {
-        val dt = Math.min(Gdx.graphics.deltaTime, MAX_DT)
+        val realDelta = Gdx.graphics.deltaTime
+        val dt = Math.min(realDelta, MAX_DT)
         accumulator += dt
 
         while (accumulator >= DT) {
@@ -53,6 +58,6 @@ class SpaceHordeGame : ApplicationAdapter() {
             tt += DT
         }
 
-        sceneContainer.draw()
+        sceneContainer.draw(realDelta, tt)
     }
 }

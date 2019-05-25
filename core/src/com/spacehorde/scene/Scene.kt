@@ -13,7 +13,7 @@ interface Scene : Disposable {
 
     fun resume()
 
-    fun draw()
+    fun draw(dt: Float, tt: Float)
 
     fun update(dt: Float, tt: Float)
 }

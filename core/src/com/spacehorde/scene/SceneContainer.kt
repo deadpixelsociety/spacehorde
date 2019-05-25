@@ -44,8 +44,8 @@ class SceneContainer : Disposable {
         scenesToRemove.forEach { remove(it) }
     }
 
-    fun draw() {
-        scenes.forEach { it.draw() }
+    fun draw(dt: Float, tt: Float) {
+        scenes.forEach { it.draw(dt, tt) }
     }
 
     override fun dispose() {
