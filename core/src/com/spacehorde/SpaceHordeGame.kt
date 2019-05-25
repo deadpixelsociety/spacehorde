@@ -2,6 +2,7 @@ package com.spacehorde
 
 import com.badlogic.gdx.ApplicationAdapter
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.assets.AssetManager
 import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneContainer
@@ -29,6 +30,7 @@ class SpaceHordeGame : ApplicationAdapter() {
 
         Fonts.load()
 
+        registerService(AssetManager())
         registerService(SpriteBatchProvider())
         registerService(ShapeRendererProvider())
         registerService(SceneContainerProvider())

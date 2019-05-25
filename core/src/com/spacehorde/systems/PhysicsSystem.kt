@@ -46,7 +46,7 @@ class PhysicsSystem : IteratingSystem(Family.all(Transform::class.java, Physics:
             physics.velocity.nor().scl(physics.maxSpeed)
         }
 
-        physics.velocity.scl(FRICTION)
+        if (!physics.frictionless) physics.velocity.scl(FRICTION)
         v0.set(physics.velocity).scl(deltaTime)
         transform.position.add(v0)
     }

@@ -34,7 +34,7 @@ class CustomControllerMappings : ControllerMappings() {
 
     override fun getDefaultMapping(defaultMapping: MappedInputs): Boolean {
         defaultMapping.putMapping(MappedInput(BUTTON_ACCEPT, ControllerButton(0)))
-        defaultMapping.putMapping(MappedInput(BUTTON_BOMB, ControllerButton(2)))
+        defaultMapping.putMapping(MappedInput(BUTTON_BOMB, ControllerButton(10)))
         defaultMapping.putMapping(MappedInput(BUTTON_START, ControllerButton(6)))
         defaultMapping.putMapping(MappedInput(BUTTON_CANCEL, ControllerButton(4)))
 

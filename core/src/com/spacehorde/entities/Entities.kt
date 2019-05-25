@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.math.MathUtils
+import com.spacehorde.assets.asset
 import com.spacehorde.components.*
 import com.spacehorde.graphics.HSB
 import com.spacehorde.graphics.toColor
@@ -14,12 +15,39 @@ import com.spacehorde.ships.ShipMask
 import com.spacehorde.usingWith
 
 object Entities {
-    private const val SHIP_HEIGHT = 16
-    private const val SHIP_WIDTH = 16
+    private val bulletTexture by asset<Texture>("textures/bullet.png")
 
     fun createPlayerShip(x: Float, y: Float): Entity {
         val entity = createShip(x, y, PlayerShipMask())
         entity.add(component<Tag> { id = Tag.PLAYER })
+        return entity
+    }
+
+    fun createBullet(x: Float, y: Float): Entity {
+        val entity = Entity()
+
+        entity.add(component<Transform> {
+            position.set(x, y)
+            origin.set(2.5f, 2.5f)
+            scale.set(3f, 3f)
+        })
+
+        entity.add(component<Size> {
+            width = 5f
+            height = 5f
+        })
+
+        entity.add(component<Physics> {
+            maxSpeed = 800f
+            rotationSpeed = .05f
+            accelerationSpeed = 400f
+            frictionless = true
+        })
+
+        entity.add(component<GroupMask> { mask = GroupMask.BULLETS })
+        entity.add(component<Tint>())
+        entity.add(component<RenderSprite> { sprite = Sprite(bulletTexture) })
+
         return entity
     }
 
@@ -28,12 +56,12 @@ object Entities {
 
         entity.add(component<Transform> {
             position.set(x, y)
-            origin.set(SHIP_WIDTH * .5f, SHIP_HEIGHT * .5f)
+            origin.set(8f, 8f)
         })
 
         entity.add(component<Size> {
-            width = SHIP_WIDTH.toFloat()
-            height = SHIP_HEIGHT.toFloat()
+            width = 16f
+            height = 16f
         })
 
         entity.add(component<Physics> {
@@ -56,9 +84,9 @@ object Entities {
         val bodyColor = HSB(0f, 0f, .95f).toColor()
         val hullColor = HSB(cockpitHue, .8f, .6f).toColor()
 
-        return Pixmap(SHIP_WIDTH, SHIP_HEIGHT, Pixmap.Format.RGBA8888).usingWith {
-            for (y in 0 until SHIP_HEIGHT) {
-                for (x in 0 until SHIP_WIDTH) {
+        return Pixmap(shipMask.width * 2, shipMask.height, Pixmap.Format.RGBA8888).usingWith {
+            for (y in 0 until shipMask.width * 2) {
+                for (x in 0 until shipMask.height) {
                     val cell = randomMask[x, y]
 
                     it.setColor(when (cell) {
