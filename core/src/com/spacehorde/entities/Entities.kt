@@ -11,13 +11,14 @@ import com.spacehorde.ships.PlayerShipMask
 import com.spacehorde.ships.ShipColor
 import com.spacehorde.ships.ShipMask
 import com.spacehorde.usingWith
-import com.spacehorde.weapons.SingleBullet
+import com.spacehorde.weapons.TwinBullet
 
 object Entities {
     fun createPlayerShip(x: Float, y: Float): Entity {
         val entity = createShip(x, y, PlayerShipMask(), MathUtils.random() * 360f)
-        entity.add(component<Tag> { id = Tag.PLAYER })
-        entity.add(component<Weaponized> { add(SingleBullet()) })
+        //entity.add(component<Tag> { id = Tag.PLAYER })
+        entity.add(component<GroupMask> { mask = GroupMask.PLAYERS })
+        entity.add(component<Weaponized> { add(TwinBullet()) })
         return entity
     }
 

@@ -23,33 +23,37 @@ class ControlSystem : EntitySystem() {
     private val weaponizedMapper by mapper<Weaponized>()
     private val mappings by service<CustomControllerMappings>()
     private val v0 = Vector2()
-    private val v1 = Vector2()
     private val axis = Vector2()
     private val q0 = Quaternion()
     private val q1 = Quaternion()
     private var tt = 0f
+    private var lastStart = 0f
 
     override fun update(deltaTime: Float) {
-        val tagSystem = engine?.getSystem(TagSystem::class.java) ?: return
-        val player = tagSystem[Tag.PLAYER]
-        val playerPhysics = physicsMapper.get(player) ?: return
-        val playerTransform = transformMapper.get(player) ?: return
-        val playerMeta = metaMapper.get(player) ?: return
-        val playerWeaponized = weaponizedMapper.get(player) ?: return
+        val groupSystem = engine?.getSystem(GroupSystem::class.java) ?: return
+        val players = groupSystem[GroupMask.PLAYERS]
 
-        val controller = Controllers.getControllers().firstOrNull()
-        if (controller != null) {
+        val controller = Controllers.getControllers().firstOrNull() ?: return
+        players.forEach { player ->
+            val physics = physicsMapper.get(player) ?: return
+            val transform = transformMapper.get(player) ?: return
+            val meta = metaMapper.get(player) ?: return
+            val weaponized = weaponizedMapper.get(player) ?: return
+
             val mappedController = MappedController(controller, mappings)
 
-            handleMovement(mappedController, playerTransform, playerPhysics)
-            handleFiring(mappedController, player, playerTransform, playerPhysics, playerMeta, playerWeaponized)
+            handleMovement(mappedController, transform, physics)
+            handleFiring(mappedController, player, transform, physics, meta, weaponized)
 
             val accept = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_ACCEPT)
             val cancel = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_CANCEL)
             val bomb = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_BOMB)
             val start = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_START)
 
-            if (start) SpaceHordeGame.DEBUG = !SpaceHordeGame.DEBUG
+            if (start && (tt - lastStart >= 1f)) {
+                SpaceHordeGame.DEBUG = !SpaceHordeGame.DEBUG
+                lastStart = tt
+            }
         }
 
         tt += deltaTime

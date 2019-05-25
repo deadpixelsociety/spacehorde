@@ -22,6 +22,9 @@ class TestScene : SceneImpl() {
     override fun create() {
         createSystems()
         engine.addEntity(Entities.createPlayerShip(0f, 0f))
+        engine.addEntity(Entities.createPlayerShip(20f, 0f))
+        engine.addEntity(Entities.createPlayerShip(-20f, 0f))
+        engine.addEntity(Entities.createPlayerShip(0f, -20f))
     }
 
     private fun createSystems() {

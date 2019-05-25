@@ -6,6 +6,7 @@ class GroupMask : PoolableComponent() {
         const val ENEMIES = 1
         const val BULLETS = 2
         const val WALLS = 4
+        const val PLAYERS = 8
     }
 
     var mask = INVALID
