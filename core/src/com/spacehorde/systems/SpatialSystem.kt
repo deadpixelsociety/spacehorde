@@ -1,5 +1,6 @@
 package com.spacehorde.systems
 
+import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntityListener
 import com.badlogic.ashley.core.Family
@@ -48,6 +49,16 @@ class SpatialSystem(val width: Float, val height: Float)
     override fun entityRemoved(entity: Entity?) {
         if (entity == null) return
         removeEntity(entity)
+    }
+
+    override fun addedToEngine(engine: Engine?) {
+        super.addedToEngine(engine)
+        engine?.addEntityListener(family, this)
+    }
+
+    override fun removedFromEngine(engine: Engine?) {
+        super.removedFromEngine(engine)
+        engine?.removeEntityListener(this)
     }
 
     override fun update(deltaTime: Float) {

@@ -6,8 +6,12 @@ import com.badlogic.gdx.controllers.Controllers
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Quaternion
 import com.badlogic.gdx.math.Vector2
+import com.spacehorde.Groups
 import com.spacehorde.SpaceHordeGame
-import com.spacehorde.components.*
+import com.spacehorde.components.Box2DPhysics
+import com.spacehorde.components.Transform
+import com.spacehorde.components.Weaponized
+import com.spacehorde.components.mapper
 import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.service.service
 import de.golfgl.gdx.controllers.mapping.MappedController
@@ -17,9 +21,8 @@ class ControlSystem : EntitySystem() {
         private const val DEADZONE = .25f
     }
 
-    private val physicsMapper by mapper<Physics>()
+    private val physicsMapper by mapper<Box2DPhysics>()
     private val transformMapper by mapper<Transform>()
-    private val metaMapper by mapper<Meta>()
     private val weaponizedMapper by mapper<Weaponized>()
     private val mappings by service<CustomControllerMappings>()
     private val v0 = Vector2()
@@ -31,19 +34,18 @@ class ControlSystem : EntitySystem() {
 
     override fun update(deltaTime: Float) {
         val groupSystem = engine?.getSystem(GroupSystem::class.java) ?: return
-        val players = groupSystem[GroupMask.PLAYERS]
+        val players = groupSystem[Groups.PLAYERS]
 
         val controller = Controllers.getControllers().firstOrNull() ?: return
         players.forEach { player ->
             val physics = physicsMapper.get(player) ?: return
             val transform = transformMapper.get(player) ?: return
-            val meta = metaMapper.get(player) ?: return
             val weaponized = weaponizedMapper.get(player) ?: return
 
             val mappedController = MappedController(controller, mappings)
 
-            handleMovement(mappedController, transform, physics)
-            handleFiring(mappedController, player, transform, physics, meta, weaponized)
+            handleMovement(deltaTime, mappedController, transform, physics)
+            handleFiring(mappedController, player, weaponized)
 
             val accept = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_ACCEPT)
             val cancel = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_CANCEL)
@@ -59,7 +61,7 @@ class ControlSystem : EntitySystem() {
         tt += deltaTime
     }
 
-    private fun handleFiring(mappedController: MappedController, player: Entity, playerTransform: Transform, playerPhysics: Physics, playerMeta: Meta, playerWeaponized: Weaponized) {
+    private fun handleFiring(mappedController: MappedController, player: Entity, playerWeaponized: Weaponized) {
         val fx = mappedController.getConfiguredAxisValue(CustomControllerMappings.FIRE_VERTICAL)
         val fy = mappedController.getConfiguredAxisValue(CustomControllerMappings.FIRE_HORIZONTAL)
         axis.set(fy, fx)
@@ -77,7 +79,7 @@ class ControlSystem : EntitySystem() {
         }
     }
 
-    private fun handleMovement(mappedController: MappedController, transform: Transform, physics: Physics) {
+    private fun handleMovement(deltaTime: Float, mappedController: MappedController, transform: Transform, physics: Box2DPhysics) {
         val mx = mappedController.getConfiguredAxisValue(CustomControllerMappings.MOVE_VERTICAL)
         val my = mappedController.getConfiguredAxisValue(CustomControllerMappings.MOVE_HORIZONTAL)
         axis.set(my, mx)

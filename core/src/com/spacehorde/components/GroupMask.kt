@@ -1,19 +1,14 @@
 package com.spacehorde.components
 
+import com.spacehorde.Groups
+import kotlin.experimental.and
+
 class GroupMask : PoolableComponent() {
-    companion object {
-        const val INVALID = 0
-        const val ENEMIES = 1
-        const val BULLETS = 2
-        const val WALLS = 4
-        const val PLAYERS = 8
-    }
+    var mask: Short = Groups.NONE
 
-    var mask = INVALID
-
-    fun has(id: Int) = mask.and(id) == id
+    fun match(id: Short) = mask.and(id) == id
 
     override fun reset() {
-        mask = INVALID
+        mask = Groups.NONE
     }
 }

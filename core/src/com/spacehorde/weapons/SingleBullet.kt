@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
+import com.spacehorde.Groups
 import com.spacehorde.assets.asset
 import com.spacehorde.components.*
 import com.spacehorde.scripts.Rotate
@@ -21,7 +22,7 @@ class SingleBullet : WeaponDefImpl() {
         private const val BULLET_ROTATION_PER_SECOND = 540f
     }
 
-    private val physicsMapper by mapper<Physics>()
+    private val physicsMapper by mapper<Box2DPhysics>()
     private val transformMapper by mapper<Transform>()
     private val metaMapper by mapper<Meta>()
     private val bulletTexture by asset<Texture>("textures/bullet.png")
@@ -41,7 +42,7 @@ class SingleBullet : WeaponDefImpl() {
         val angle = (MathUtils.atan2(axis.x, axis.y) * MathUtils.radiansToDegrees) + 180f
         transform.angle = angle % 360f
         transform.heading.setAngle(transform.angle)
-        physics.velocity.set(playerPhysics.velocity)
+        physics.body?.linearVelocity = playerPhysics.body?.linearVelocity
         physics.acceleration.set(v0.set(0f, 1f).rotate(transform.heading.angle()).scl(physics.accelerationSpeed))
         engine.addEntity(bullet)
     }
@@ -50,7 +51,6 @@ class SingleBullet : WeaponDefImpl() {
         val entity = Entity()
 
         entity.add(component<Spatial>())
-        entity.add(component<Collision> { mask = GroupMask.ENEMIES.or(GroupMask.WALLS) })
         entity.add(component<Transform> {
             position.set(x, y)
             origin.set(BULLET_SIZE * .5f, BULLET_SIZE * .5f)
@@ -61,14 +61,14 @@ class SingleBullet : WeaponDefImpl() {
             height = BULLET_SIZE
         })
 
-        entity.add(component<Physics> {
+        entity.add(component<Box2DPhysics> {
             maxSpeed = BULLET_SPEED
             rotationSpeed = 1f / BULLET_ROTATION_PER_SECOND
             accelerationSpeed = BULLET_ACCELERATION
             frictionless = true
         })
 
-        entity.add(component<GroupMask> { mask = GroupMask.BULLETS })
+        entity.add(component<GroupMask> { mask = Groups.BULLETS })
         entity.add(component<Tint> { color.set(bulletColor) })
         entity.add(component<RenderSprite> { sprite = Sprite(bulletTexture) })
         entity.add(component<Scripted> {

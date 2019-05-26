@@ -6,13 +6,13 @@ import com.badlogic.gdx.assets.AssetManager
 import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneContainer
+import com.spacehorde.scene.impl.TestScene
 import com.spacehorde.service.ServiceContainer
 import com.spacehorde.service.impl.SceneContainerProvider
 import com.spacehorde.service.impl.ShapeRendererProvider
 import com.spacehorde.service.impl.SpriteBatchProvider
 import com.spacehorde.service.registerService
 import com.spacehorde.service.service
-import com.spacehorde.scene.impl.TestScene
 
 class SpaceHordeGame : ApplicationAdapter() {
     companion object {

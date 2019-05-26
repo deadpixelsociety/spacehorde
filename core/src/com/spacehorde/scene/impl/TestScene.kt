@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import com.spacehorde.Groups
 import com.spacehorde.SpaceHordeGame
 import com.spacehorde.components.GroupMask
 import com.spacehorde.components.Transform
@@ -27,13 +28,16 @@ class TestScene : SceneImpl() {
 
     override fun create() {
         createSystems()
-        engine.addEntity(Entities.createWall(0f, 0f, 4f, 525f))
-        engine.addEntity(Entities.createWall(521f, 00f, 4f, 525f))
-        engine.addEntity(Entities.createWall(4f, 521f, 517f, 4f))
-        engine.addEntity(Entities.createWall(4f, 0f, 517f, 4f))
 
-        engine.addEntity(Entities.createPlayerShip(250f, 250f))
-        engine.addEntity(Entities.createDiamondEnemy(300f, 250f))
+        Entities.wall(engine, -250f, -250f, 5f, 500f)
+        Entities.wall(engine, 250f, -250f, 5f, 500f)
+        Entities.wall(engine, -250f, -250f, 505f, 5f)
+        Entities.wall(engine, -250f, 245f, 505f, 5f)
+
+        Entities.player(engine, 0f, -200f)
+
+        // Prime physics
+        engine.getSystem(Box2DSystem::class.java).update(1f)
     }
 
     private fun createSystems() {
@@ -42,8 +46,7 @@ class TestScene : SceneImpl() {
         engine.addSystem(GraveyardSystem())
         engine.addSystem(ControlSystem())
         engine.addSystem(ScriptSystem())
-        engine.addSystem(PhysicsSystem())
-        engine.addSystem(CollisionSystem())
+        engine.addSystem(Box2DSystem())
         engine.addSystem(SpatialSystem(500f, 500f))
         engine.addSystem(RenderSystem(viewport.camera))
         if (SpaceHordeGame.DEBUG) engine.addSystem(DebugRenderSystem(viewport.camera))
@@ -58,7 +61,7 @@ class TestScene : SceneImpl() {
         engine.update(dt)
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            engine.addEntity(Entities.createPlayerShip(0f, 0f))
+            engine.addEntity(Entities.player(engine, 0f, 0f))
         }
     }
 
@@ -66,7 +69,7 @@ class TestScene : SceneImpl() {
         Gdx.gl.glClearColor(.05f, .05f, .05f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
 
-        val players = engine.getSystem(GroupSystem::class.java)[GroupMask.PLAYERS]
+        val players = engine.getSystem(GroupSystem::class.java)[Groups.PLAYERS]
         var px = 0f
         var py = 0f
 
