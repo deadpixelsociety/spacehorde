@@ -11,6 +11,10 @@ class Box2DPhysics : PoolableComponent() {
     var body: Body? = null
     val fixtureDefs = mutableListOf<FixtureDef>()
 
+    var initialSpeed = 0f
+    var initialAngle = 0f
+    val initialOffset = Vector2()
+
     var collision = false
     var collided: Entity? = null
     val lastNormal = Vector2()
@@ -27,6 +31,9 @@ class Box2DPhysics : PoolableComponent() {
         bodyDef = BodyDef()
         body = null
         fixtureDefs.clear()
+        initialAngle = 0f
+        initialSpeed = 0f
+        initialOffset.set(0f, 0f)
         collision = false
         collided = null
         lastNormal.set(0f, 0f)

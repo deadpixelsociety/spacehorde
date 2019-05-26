@@ -1,6 +1,7 @@
 package com.spacehorde.components
 
 import com.badlogic.ashley.core.Component
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.utils.Pools
 
 inline fun <reified T : Component> mapper() = ComponentMapperDelegate(T::class.java)
@@ -12,3 +13,5 @@ inline fun <reified T : Component> component(init: T.(T) -> Unit): T {
 }
 
 inline fun <reified T : Component> component(): T = component { }
+
+inline fun <reified T : Component> Entity.has() = getComponent(T::class.java) != null

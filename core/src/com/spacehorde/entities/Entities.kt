@@ -2,26 +2,27 @@ package com.spacehorde.entities
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.CircleShape
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import com.badlogic.gdx.utils.ObjectMap
 import com.spacehorde.Groups
-import com.spacehorde.components.Box2DPhysics
-import com.spacehorde.components.RenderSprite
-import com.spacehorde.components.Size
-import com.spacehorde.components.Transform
+import com.spacehorde.components.*
 import kotlin.experimental.or
 
 object Entities {
     const val PLAYER = "player"
     const val WALL = "wall"
+    const val BULLET = "bullet"
 
     private val generators = ObjectMap<String, EntityGenerator>()
 
     init {
         generators.put(PLAYER, PlayerShipGenerator())
         generators.put(WALL, WallGenerator())
+        generators.put(BULLET, BulletGenerator())
     }
 
     fun get(id: String, engine: Engine, init: Entity.() -> Unit): Entity {
@@ -33,19 +34,46 @@ object Entities {
 
     fun player(engine: Engine, x: Float, y: Float): Entity {
         return get(PLAYER, engine) {
-            val transform = getComponent(Transform::class.java).apply {
+            getComponent(Transform::class.java).apply {
                 this.position.set(x, y)
             }
 
             getComponent(Box2DPhysics::class.java).apply {
                 this.bodyDef.position.set(x, y)
-                this.maxSpeed = 500f
-                this.accelerationSpeed = 500f
-                this.rotationSpeed = .075f
 
                 fixtureDefs[0].apply {
                     this.filter.categoryBits = Groups.PLAYERS
-                    this.filter.maskBits = Groups.ENEMIES.or(Groups.WALLS)
+                    this.filter.maskBits = Groups.ENEMIES.or(Groups.WALLS).or(Groups.PLAYERS)
+                }
+            }
+        }
+    }
+
+    fun bullet(engine: Engine, x: Float, y: Float, width: Float, height: Float, color: Color): Entity {
+        return get(BULLET, engine) {
+            getComponent(Transform::class.java).apply {
+                this.position.set(x, y)
+                this.origin.set(width * .5f, height * .5f)
+            }
+
+            getComponent(RenderSprite::class.java).apply {
+                sprite?.apply {
+                    this.setSize(width, height)
+                    this.setOriginCenter()
+                }
+            }
+
+            getComponent(Tint::class.java).apply {
+                this.color.set(color)
+            }
+
+            getComponent(Box2DPhysics::class.java).apply {
+                this.bodyDef.position.set(x, y)
+
+                fixtureDefs[0].apply {
+                    this.shape = CircleShape().apply {
+                        this.radius = width * .5f
+                    }
                 }
             }
         }

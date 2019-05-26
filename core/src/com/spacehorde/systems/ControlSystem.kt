@@ -8,22 +8,22 @@ import com.badlogic.gdx.math.Quaternion
 import com.badlogic.gdx.math.Vector2
 import com.spacehorde.Groups
 import com.spacehorde.SpaceHordeGame
-import com.spacehorde.components.Box2DPhysics
-import com.spacehorde.components.Transform
-import com.spacehorde.components.Weaponized
-import com.spacehorde.components.mapper
+import com.spacehorde.components.*
 import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.service.service
 import de.golfgl.gdx.controllers.mapping.MappedController
 
 class ControlSystem : EntitySystem() {
     companion object {
-        private const val DEADZONE = .25f
+        private const val MOVE_DEADZONE = .33f
+        private const val FIRE_DEADZONE = .33f
     }
 
     private val physicsMapper by mapper<Box2DPhysics>()
     private val transformMapper by mapper<Transform>()
     private val weaponizedMapper by mapper<Weaponized>()
+    private val debugMapper by mapper<Debug>()
+
     private val mappings by service<CustomControllerMappings>()
     private val v0 = Vector2()
     private val axis = Vector2()
@@ -38,14 +38,10 @@ class ControlSystem : EntitySystem() {
 
         val controller = Controllers.getControllers().firstOrNull() ?: return
         players.forEach { player ->
-            val physics = physicsMapper.get(player) ?: return
-            val transform = transformMapper.get(player) ?: return
-            val weaponized = weaponizedMapper.get(player) ?: return
-
             val mappedController = MappedController(controller, mappings)
 
-            handleMovement(deltaTime, mappedController, transform, physics)
-            handleFiring(mappedController, player, weaponized)
+            handleMovement(mappedController, player)
+            handleFiring(mappedController, player)
 
             val accept = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_ACCEPT)
             val cancel = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_CANCEL)
@@ -61,31 +57,16 @@ class ControlSystem : EntitySystem() {
         tt += deltaTime
     }
 
-    private fun handleFiring(mappedController: MappedController, player: Entity, playerWeaponized: Weaponized) {
-        val fx = mappedController.getConfiguredAxisValue(CustomControllerMappings.FIRE_VERTICAL)
-        val fy = mappedController.getConfiguredAxisValue(CustomControllerMappings.FIRE_HORIZONTAL)
-        axis.set(fy, fx)
-        val magnitude = axis.len()
-        if (magnitude < DEADZONE) axis.set(0f, 0f)
-        else axis.set(axis.nor().scl((magnitude - DEADZONE) / (1 - DEADZONE)))
+    private fun handleMovement(mappedController: MappedController, player: Entity) {
+        val physics = physicsMapper.get(player) ?: return
+        val transform = transformMapper.get(player) ?: return
 
-        if (axis.len() > 0) {
-            playerWeaponized.weapons().forEach { weapon ->
-                if (weapon.canFire(tt)) {
-                    weapon.fire(axis, engine, player)
-                    weapon.lastFired = tt
-                }
-            }
-        }
-    }
-
-    private fun handleMovement(deltaTime: Float, mappedController: MappedController, transform: Transform, physics: Box2DPhysics) {
         val mx = mappedController.getConfiguredAxisValue(CustomControllerMappings.MOVE_VERTICAL)
         val my = mappedController.getConfiguredAxisValue(CustomControllerMappings.MOVE_HORIZONTAL)
         axis.set(my, mx)
         val magnitude = axis.len()
-        if (magnitude < DEADZONE) axis.set(0f, 0f)
-        else axis.set(axis.nor().scl((magnitude - DEADZONE) / (1 - DEADZONE)))
+        if (magnitude < MOVE_DEADZONE) axis.set(0f, 0f)
+        else axis.set(axis.nor().scl((magnitude - MOVE_DEADZONE) / (1 - MOVE_DEADZONE)))
 
         if (axis.len() > 0) {
             q0.setFromAxis(0f, 0f, 1f, transform.angle)
@@ -96,6 +77,29 @@ class ControlSystem : EntitySystem() {
             physics.acceleration.set(v0.set(0f, 1f).rotate(transform.angle).scl(physics.accelerationSpeed))
         } else {
             physics.acceleration.set(0f, 0f)
+        }
+    }
+
+    private fun handleFiring(mappedController: MappedController, player: Entity) {
+        val weaponized = weaponizedMapper.get(player)
+        val debug = debugMapper.get(player)
+
+        val fx = mappedController.getConfiguredAxisValue(CustomControllerMappings.FIRE_VERTICAL)
+        val fy = mappedController.getConfiguredAxisValue(CustomControllerMappings.FIRE_HORIZONTAL)
+        axis.set(fy, -fx)
+        val magnitude = axis.len()
+        if (magnitude < FIRE_DEADZONE) axis.set(0f, 0f)
+        else axis.set(axis.nor().scl((magnitude - FIRE_DEADZONE) / (1 - FIRE_DEADZONE)))
+
+        debug?.fireAxis?.set(axis)
+
+        if (axis.len() > 0 && weaponized != null) {
+            weaponized.weapons().forEach { weapon ->
+                if (weapon.canFire(tt)) {
+                    weapon.fire(axis, engine, player)
+                    weapon.lastFired = tt
+                }
+            }
         }
     }
 }

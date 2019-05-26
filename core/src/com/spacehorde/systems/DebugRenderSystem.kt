@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.spacehorde.components.Debug
 import com.spacehorde.components.Size
 import com.spacehorde.components.Transform
 import com.spacehorde.components.mapper
@@ -21,10 +22,12 @@ class DebugRenderSystem(private val camera: Camera)
         private const val ORIGIN = true
         private const val HEADING = true
         private const val BOUNDS = false
+        private const val FIRE_AXIS = true
     }
 
     private val transformMapper by mapper<Transform>()
     private val sizeMapper by mapper<Size>()
+    private val debugMapper by mapper<Debug>()
     private val shape by service<ShapeRenderer>()
     private val box2DDebugRenderer = Box2DDebugRenderer()
     private val v0 = Vector2()
@@ -92,6 +95,23 @@ class DebugRenderSystem(private val camera: Camera)
             val sx = size.width * transform.scale.x * .5f
             val sy = size.height * transform.scale.y * .5f
             shape.box(v0.x - sx, v0.y - sy, 0f, sx * 2f, sy * 2f, 0f)
+        }
+
+        if (FIRE_AXIS) {
+            val debug = debugMapper.get(entity)
+            if (debug != null) {
+                shape.color = Color.LIME
+                v1.set(debug.fireAxis).scl(20f)
+                shape.line(v0.x, v0.y, v0.x + v1.x, v0.y + v1.y)
+
+                shape.color = Color.PURPLE
+                v1.set(-debug.fireAxis.y, debug.fireAxis.x).scl(20f)
+                shape.line(v0.x, v0.y, v0.x + v1.x, v0.y + v1.y)
+
+                shape.color = Color.ORANGE
+                v1.set(debug.fireAxis.y, -debug.fireAxis.x).scl(20f)
+                shape.line(v0.x, v0.y, v0.x + v1.x, v0.y + v1.y)
+            }
         }
 
         /*

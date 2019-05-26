@@ -61,7 +61,7 @@ class TestScene : SceneImpl() {
         engine.update(dt)
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            engine.addEntity(Entities.player(engine, 0f, 0f))
+            Entities.player(engine, 0f, 0f)
         }
     }
 

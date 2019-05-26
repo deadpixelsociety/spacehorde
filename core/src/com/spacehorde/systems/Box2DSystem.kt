@@ -1,15 +1,14 @@
 package com.spacehorde.systems
 
 import com.badlogic.ashley.core.*
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.Body
-import com.badlogic.gdx.physics.box2d.World
-import com.spacehorde.components.Box2DPhysics
+import com.badlogic.gdx.physics.box2d.*
+import com.spacehorde.components.*
 import com.spacehorde.components.Transform
-import com.spacehorde.components.mapper
 import com.spacehorde.gdxArray
 
-class Box2DSystem : EntitySystem(), EntityListener {
+class Box2DSystem : EntitySystem(), EntityListener, ContactListener {
     companion object {
         const val FRICTION = .985f
     }
@@ -34,6 +33,12 @@ class Box2DSystem : EntitySystem(), EntityListener {
         box2d.body = body
         box2d.fixtureDefs.forEach { body.createFixture(it) }
         body.userData = entity
+
+        box2d.body?.let {
+            it.setTransform(Vector2(body.worldCenter).add(box2d.initialOffset), box2d.initialAngle)
+            it.linearVelocity = Vector2(MathUtils.cos(box2d.initialAngle), MathUtils.sin(box2d.initialAngle)).scl(box2d.initialSpeed)
+            println("initialVelocity ${it.linearVelocity}")
+        }
     }
 
     override fun entityRemoved(entity: Entity?) {
@@ -43,8 +48,62 @@ class Box2DSystem : EntitySystem(), EntityListener {
         box2d.body = null
     }
 
+    override fun beginContact(contact: Contact?) {
+        if (contact != null) {
+            val entityA = contact.fixtureA?.body?.userData as? Entity
+            val entityB = contact.fixtureB?.body?.userData as? Entity
+
+            if (entityA != null && !entityA.has<Dead>()) {
+                val box2d = physicsMapper.get(entityA)
+                if (box2d != null) {
+                    box2d.collision = true
+                    box2d.collided = entityB
+                    box2d.lastNormal.set(contact.worldManifold.normal)
+                }
+            }
+
+            if (entityB != null && !entityB.has<Dead>()) {
+                val box2d = physicsMapper.get(entityB)
+                if (box2d != null) {
+                    box2d.collision = true
+                    box2d.collided = entityA
+                    box2d.lastNormal.set(contact.worldManifold.normal)
+                }
+            }
+        }
+    }
+
+    override fun endContact(contact: Contact?) {
+        if (contact != null) {
+            val entityA = contact.fixtureA?.body?.userData as? Entity
+            val entityB = contact.fixtureB?.body?.userData as? Entity
+
+            if (entityA != null) {
+                val box2d = physicsMapper.get(entityA)
+                if (box2d != null && (box2d.collided == null || box2d.collided == entityB)) {
+                    box2d.collision = false
+                    box2d.collided = null
+                }
+            }
+
+            if (entityB != null) {
+                val box2d = physicsMapper.get(entityB)
+                if (box2d != null && (box2d.collided == null || box2d.collided == entityA)) {
+                    box2d.collision = false
+                    box2d.collided = null
+                }
+            }
+        }
+    }
+
+    override fun preSolve(contact: Contact?, oldManifold: Manifold?) {
+    }
+
+    override fun postSolve(contact: Contact?, impulse: ContactImpulse?) {
+    }
+
     override fun update(deltaTime: Float) {
-        world.step(deltaTime, 5, 5)
+        world.step(deltaTime, 3, 2)
 
         bodyList.clear()
         world.getBodies(bodyList)
@@ -71,6 +130,8 @@ class Box2DSystem : EntitySystem(), EntityListener {
                 physics.body?.linearVelocity = v1
             }
 
+            println("current velocity: ${body.linearVelocity}")
+
             transform.position.set(body.position.x - transform.origin.x, body.position.y - transform.origin.y)
             transform.heading.set(0f, 1f).rotate(body.linearVelocity.angle() - 90f).scl(body.linearVelocity.len())
         }
@@ -82,11 +143,13 @@ class Box2DSystem : EntitySystem(), EntityListener {
     override fun addedToEngine(engine: Engine?) {
         super.addedToEngine(engine)
         engine?.addEntityListener(Family.all(Box2DPhysics::class.java).get(), this)
+        world.setContactListener(this)
     }
 
     override fun removedFromEngine(engine: Engine?) {
         super.removedFromEngine(engine)
         engine?.removeEntityListener(this)
+        world.setContactListener(null)
         world.dispose()
     }
 }

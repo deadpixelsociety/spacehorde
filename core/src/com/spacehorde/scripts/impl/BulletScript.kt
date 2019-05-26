@@ -16,7 +16,6 @@ class BulletScript : Script() {
         if (physics.collision) {
             val collidedGroup = groupMapper.get(physics.collided)
             if (collidedGroup.match(Groups.WALLS)) {
-                // collide with walls
                 entity.add(component<Dead>())
             } else if (collidedGroup.match(Groups.ENEMIES)) {
                 // collide with enemies
