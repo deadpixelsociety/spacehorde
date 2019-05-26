@@ -35,6 +35,7 @@ class ScaleTween() : TweenScript<Vector2>() {
 
     override fun start(engine: Engine, entity: Entity) {
         val transform = transformMapper[entity] ?: return
+        elapsed = 0f
         start.set(transform.scale)
     }
 

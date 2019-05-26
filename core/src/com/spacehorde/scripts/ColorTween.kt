@@ -29,6 +29,11 @@ class ColorTween() : TweenScript<Color>() {
 
     private val tintMapper by mapper<Tint>()
 
+    override fun start(engine: Engine, entity: Entity) {
+        super.start(engine, entity)
+        elapsed = 0f
+    }
+
     override fun updateValue(engine: Engine, entity: Entity, value: Color) {
         val tint = tintMapper[entity] ?: return
         tint.color.set(value)

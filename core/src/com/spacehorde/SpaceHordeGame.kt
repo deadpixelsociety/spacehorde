@@ -6,7 +6,7 @@ import com.badlogic.gdx.assets.AssetManager
 import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneContainer
-import com.spacehorde.scene.impl.TestScene
+import com.spacehorde.scene.impl.ArenaScene
 import com.spacehorde.service.ServiceContainer
 import com.spacehorde.service.impl.SceneContainerProvider
 import com.spacehorde.service.impl.ShapeRendererProvider
@@ -38,7 +38,7 @@ class SpaceHordeGame : ApplicationAdapter() {
         registerService(SceneContainerProvider())
         registerService(CustomControllerMappings())
 
-        sceneContainer.add(TestScene())
+        sceneContainer.add(ArenaScene())
     }
 
     override fun pause() {

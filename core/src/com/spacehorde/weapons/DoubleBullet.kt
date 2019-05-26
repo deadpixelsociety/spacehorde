@@ -24,6 +24,8 @@ class DoubleBullet : WeaponDefImpl() {
     private val v0 = Vector2()
     private val v1 = Vector2()
 
+    override val fireDelay = .15f
+
     override fun fire(axis: Vector2, engine: Engine, owner: Entity) {
         val playerPhysics = physicsMapper.get(owner) ?: return
         val playerTransform = transformMapper.get(owner) ?: return

@@ -12,7 +12,7 @@ abstract class TweenScript<T> : Script() {
 
     var tween = { _: T, end: T, _: Float -> end }
 
-    private var elapsed = 0f
+    protected var elapsed = 0f
 
     override fun update(deltaTime: Float, engine: Engine, entity: Entity): Boolean {
         if (duration < Duration.INFINITE) return true

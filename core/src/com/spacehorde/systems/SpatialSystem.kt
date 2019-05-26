@@ -8,10 +8,8 @@ import com.badlogic.ashley.systems.IteratingSystem
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.spacehorde.components.Size
-import com.spacehorde.components.Spatial
-import com.spacehorde.components.Transform
-import com.spacehorde.components.mapper
+import com.spacehorde.Groups
+import com.spacehorde.components.*
 
 class SpatialSystem(val width: Float, val height: Float)
     : IteratingSystem(Family.all(Transform::class.java, Size::class.java, Spatial::class.java).get()), EntityListener {
@@ -33,9 +31,11 @@ class SpatialSystem(val width: Float, val height: Float)
 
     val cols = MathUtils.ceil(width / CELL_SIZE)
     val rows = MathUtils.ceil(height / CELL_SIZE)
+    val position = Vector2(-width * .5f, -height * .5f)
 
     private val transformMapper by mapper<Transform>()
     private val sizeMapper by mapper<Size>()
+    private val groupMapper by mapper<GroupMask>()
     private val spatialMapper by mapper<Spatial>()
     private val cells = Array(rows) { Array(cols) { mutableListOf<Entity>() } }
     private val v0 = Vector2()
@@ -70,16 +70,18 @@ class SpatialSystem(val width: Float, val height: Float)
         placeEntity(entity)
     }
 
-    fun getNeighbors(entity: Entity): List<Entity> {
+    fun getNeighbors(entity: Entity, filter: Short = Groups.NONE): List<Entity> {
         val list = mutableListOf<Entity>()
         val transform = transformMapper.get(entity) ?: return list
-        val x = MathUtils.floor((transform.position.x + transform.origin.x) / CELL_SIZE)
-        val y = MathUtils.floor((transform.position.y + transform.origin.y) / CELL_SIZE)
+        val x = MathUtils.floor((-position.x + transform.position.x + transform.origin.x) / CELL_SIZE)
+        val y = MathUtils.floor((-position.y + transform.position.y + transform.origin.y) / CELL_SIZE)
 
-        NEIGHBORS.forEach {
-            val nx = (x + it.x).toInt()
-            val ny = (y + it.y).toInt()
-            if (withinBounds(nx, ny)) list.addAll(cells[ny][nx])
+        NEIGHBORS.forEach { neighbor ->
+            val nx = (x + neighbor.x).toInt()
+            val ny = (y + neighbor.y).toInt()
+            if (withinBounds(nx, ny)) list.addAll(cells[ny][nx].filter { entity ->
+                filter == Groups.NONE || groupMapper.get(entity)?.match(filter) ?: false
+            })
         }
 
         list.remove(entity)
@@ -108,7 +110,7 @@ class SpatialSystem(val width: Float, val height: Float)
 
         for (y in 0 until rows) {
             for (x in 0 until cols) {
-                r1.set(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+                r1.set(position.x + x * CELL_SIZE, position.y + y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
                 if (r1.contains(bounds) || r1.overlaps(bounds)) {
                     cells[y][x].add(entity)
                     spatial.cells.add(Pair(x, y))

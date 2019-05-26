@@ -130,8 +130,6 @@ class Box2DSystem : EntitySystem(), EntityListener, ContactListener {
                 physics.body?.linearVelocity = v1
             }
 
-            println("current velocity: ${body.linearVelocity}")
-
             transform.position.set(body.position.x - transform.origin.x, body.position.y - transform.origin.y)
             transform.heading.set(0f, 1f).rotate(body.linearVelocity.angle() - 90f).scl(body.linearVelocity.len())
         }

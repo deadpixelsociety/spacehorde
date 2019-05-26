@@ -37,21 +37,21 @@ class ControlSystem : EntitySystem() {
         val players = groupSystem[Groups.PLAYERS]
 
         val controller = Controllers.getControllers().firstOrNull() ?: return
-        players.forEach { player ->
-            val mappedController = MappedController(controller, mappings)
+        val mappedController = MappedController(controller, mappings)
 
+        val bomb = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_BOMB)
+        val accept = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_ACCEPT)
+        val cancel = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_CANCEL)
+        val start = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_START)
+
+        players.forEach { player ->
             handleMovement(mappedController, player)
             handleFiring(mappedController, player)
+        }
 
-            val accept = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_ACCEPT)
-            val cancel = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_CANCEL)
-            val bomb = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_BOMB)
-            val start = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_START)
-
-            if (start && (tt - lastStart >= 1f)) {
-                SpaceHordeGame.DEBUG = !SpaceHordeGame.DEBUG
-                lastStart = tt
-            }
+        if (start && (tt - lastStart >= 1f)) {
+            SpaceHordeGame.DEBUG = !SpaceHordeGame.DEBUG
+            lastStart = tt
         }
 
         tt += deltaTime

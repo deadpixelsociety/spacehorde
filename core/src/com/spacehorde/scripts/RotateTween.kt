@@ -36,6 +36,7 @@ class RotateTween() : TweenScript<Float>() {
 
     override fun start(engine: Engine, entity: Entity) {
         val transform = transformMapper[entity] ?: return
+        elapsed = 0f
         start = transform.angle
     }
 

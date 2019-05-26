@@ -37,7 +37,7 @@ class DebugRenderSystem(private val camera: Camera)
 
     override fun update(deltaTime: Float) {
         begin()
-        //renderSpatial()
+        renderSpatial()
         super.update(deltaTime)
         end()
 
@@ -52,7 +52,7 @@ class DebugRenderSystem(private val camera: Camera)
         val size = SpatialSystem.CELL_SIZE
         for (y in 0 until spatialSystem.rows) {
             for (x in 0 until spatialSystem.cols) {
-                shape.box(x * size, y * size, 0f, size, size, 0f)
+                shape.box(spatialSystem.position.x + x * size, spatialSystem.position.x + y * size, 0f, size, size, 0f)
             }
         }
     }
@@ -114,14 +114,13 @@ class DebugRenderSystem(private val camera: Camera)
             }
         }
 
-        /*
+        val spatialSystem = engine.getSystem(SpatialSystem::class.java)
         shape.color = Color.YELLOW
         val neighbors = spatialSystem.getNeighbors(entity)
         neighbors.forEach {
             val neighborTransform = transformMapper.get(it)
             shape.line(transform.position, neighborTransform.position)
         }
-        */
 
         shape.color = Color.WHITE
     }

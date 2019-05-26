@@ -10,12 +10,18 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import com.badlogic.gdx.utils.ObjectMap
 import com.spacehorde.Groups
 import com.spacehorde.components.*
+import com.spacehorde.entities.generators.*
 import kotlin.experimental.or
 
 object Entities {
-    const val PLAYER = "player"
-    const val WALL = "wall"
-    const val BULLET = "bullet"
+    private const val PLAYER = "player"
+    private const val WALL = "wall"
+    private const val BULLET = "bullet"
+    private const val ENEMY_CIRCLE = "enemy_circle"
+    private const val ENEMY_CROSS = "enemy_cross"
+    private const val ENEMY_DIAMOND = "enemy_diamond"
+    private const val ENEMY_PINWHEEL = "enemy_pinwheel"
+    private const val ENEMY_SMALL = "enemy_small"
 
     private val generators = ObjectMap<String, EntityGenerator>()
 
@@ -23,6 +29,11 @@ object Entities {
         generators.put(PLAYER, PlayerShipGenerator())
         generators.put(WALL, WallGenerator())
         generators.put(BULLET, BulletGenerator())
+        generators.put(ENEMY_CIRCLE, EnemyCircleShipGenerator())
+        generators.put(ENEMY_CROSS, EnemyCrossShipGenerator())
+        generators.put(ENEMY_DIAMOND, EnemyDiamondShipGenerator())
+        generators.put(ENEMY_PINWHEEL, EnemyPinwheelShipGenerator())
+        generators.put(ENEMY_SMALL, EnemySmallShipGenerator())
     }
 
     fun get(id: String, engine: Engine, init: Entity.() -> Unit): Entity {
@@ -30,6 +41,37 @@ object Entities {
         entity.init()
         engine.addEntity(entity)
         return entity
+    }
+
+    fun enemyCircle(engine: Engine): Entity {
+        return enemy(engine, ENEMY_CIRCLE)
+    }
+
+    fun enemyCross(engine: Engine): Entity {
+        return enemy(engine, ENEMY_CROSS)
+    }
+
+    fun enemyDiamond(engine: Engine): Entity {
+        return enemy(engine, ENEMY_DIAMOND)
+    }
+
+    fun enemyPinwheel(engine: Engine): Entity {
+        return enemy(engine, ENEMY_PINWHEEL)
+    }
+
+    fun enemySmall(engine: Engine): Entity {
+        return enemy(engine, ENEMY_SMALL)
+    }
+
+    private fun enemy(engine: Engine, type: String): Entity {
+        return get(type, engine) {
+            getComponent(Box2DPhysics::class.java).apply {
+                fixtureDefs[0].apply {
+                    this.filter.categoryBits = Groups.ENEMIES
+                    this.filter.maskBits = Groups.WALLS.or(Groups.BULLETS).or(Groups.ENEMIES).or(Groups.PLAYERS)
+                }
+            }
+        }
     }
 
     fun player(engine: Engine, x: Float, y: Float): Entity {
