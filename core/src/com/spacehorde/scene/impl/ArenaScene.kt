@@ -84,7 +84,7 @@ class ArenaScene : SceneImpl() {
                 clearDudes()
                 Entities.player(engine, 0f, 0f, true)
                 dead = false
-                ScoreKeeper.score = 0
+                ScoreKeeper.reset()
                 WaveTracker.reset()
                 bombs = 3
             }

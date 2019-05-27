@@ -56,4 +56,10 @@ object ScoreKeeper : LifecycleListener {
             }
         }
     }
+
+    fun reset() {
+        lastNewBomb = 0
+        lastNewShip = 0
+        score = 0
+    }
 }
