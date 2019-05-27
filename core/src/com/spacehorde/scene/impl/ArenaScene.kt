@@ -81,7 +81,7 @@ class ArenaScene : SceneImpl() {
 
         engine.getSystem(ControlSystem::class.java).startEvent = {
             if (dead) {
-                moon2H()
+                clearDudes()
                 Entities.player(engine, 0f, 0f, true)
                 dead = false
                 ScoreKeeper.score = 0
@@ -96,6 +96,15 @@ class ArenaScene : SceneImpl() {
             val group = it.getComponent(GroupMask::class.java)
             if (group != null && (group.match(Groups.ENEMIES) || group.match(Groups.SHRAPNEL))) {
                 it.add(component<Dying>(engine))
+            }
+        }
+    }
+
+    private fun clearDudes() {
+        engine.entities.forEach {
+            val group = it.getComponent(GroupMask::class.java)
+            if (group != null && (group.match(Groups.ENEMIES) || group.match(Groups.SHRAPNEL))) {
+                engine.removeEntity(it)
             }
         }
     }
