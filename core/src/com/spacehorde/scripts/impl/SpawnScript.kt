@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.spacehorde.Groups
 import com.spacehorde.components.*
-import com.spacehorde.scripts.FadeScript
 import com.spacehorde.scripts.Script
 
 class SpawnScript : Script() {
@@ -13,7 +12,7 @@ class SpawnScript : Script() {
     private val scriptMapper by mapper<Scripted>()
     private val tintMapper by mapper<Tint>()
 
-    var spawnTime = 3f
+    var spawnTime = 2f
     private var originalGroup = Groups.NONE
     private var originalCategory = Groups.NONE
     private val fadeScript = FadeScript(.25f, .5f)

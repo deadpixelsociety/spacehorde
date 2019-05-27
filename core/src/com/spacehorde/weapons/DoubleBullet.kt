@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
+import com.spacehorde.AudioManager
 import com.spacehorde.components.Box2DPhysics
 import com.spacehorde.components.Meta
 import com.spacehorde.components.Transform
@@ -14,8 +15,8 @@ import com.spacehorde.ships.ShipColor
 
 class DoubleBullet : WeaponDefImpl() {
     companion object {
-        private const val BULLET_SIZE = 5f
-        private const val BULLET_OFFSET = 6f
+        private const val BULLET_SIZE = 3f
+        private const val BULLET_OFFSET = 4f
     }
 
     private val physicsMapper by mapper<Box2DPhysics>()
@@ -35,17 +36,25 @@ class DoubleBullet : WeaponDefImpl() {
         val color = playerMeta.get<ShipColor>("ShipColor").cockpitColor
 
         addBullet(engine, axis, color, -1, playerPhysics)
+        addBullet(engine, axis, color, 0, playerPhysics)
         addBullet(engine, axis, color, 1, playerPhysics)
+
+        AudioManager.playShoot(.15f)
     }
 
     private fun addBullet(engine: Engine, axis: Vector2, color: Color, dir: Int, playerPhysics: Box2DPhysics) {
-        if (dir == -1) v1.set(-axis.y, axis.x).nor().scl(BULLET_OFFSET) else v1.set(axis.y, -axis.x).nor().scl(BULLET_OFFSET)
+        when (dir) {
+            -1 -> v1.set(-axis.y, axis.x).nor().scl(BULLET_OFFSET)
+            1 -> v1.set(axis.y, -axis.x).nor().scl(BULLET_OFFSET)
+            else -> v1.set(axis.y, axis.x).nor().scl(BULLET_OFFSET)
+        }
+
         v1.add(v0).add(BULLET_SIZE * .5f, BULLET_SIZE * .5f)
 
         val bullet = Entities.bullet(engine, v1.x, v1.y, BULLET_SIZE, BULLET_SIZE, color)
         val physics = physicsMapper.get(bullet)
 
-        physics.initialAngle = axis.angleRad() + (MathUtils.random(-.15f, .15f))
+        physics.initialAngle = axis.angleRad() + (MathUtils.random(-.25f, .25f) + MathUtils.random(-.25f, .25f))
         physics.initialSpeed = (playerPhysics.body?.linearVelocity?.len() ?: 0f) + physics.maxSpeed
 
         engine.addEntity(bullet)

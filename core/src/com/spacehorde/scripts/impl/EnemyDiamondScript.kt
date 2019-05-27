@@ -18,7 +18,6 @@ class EnemyDiamondScript : EnemyScript() {
 
     private fun evadeAndChasePlayerAndAvoidBullets(engine: Engine, entity: Entity) {
         val groupSystem = engine.getSystem(GroupSystem::class.java)
-        val spatialSystem = engine.getSystem(SpatialSystem::class.java)
         val players = groupSystem[Groups.PLAYERS]
         val bullets = groupSystem[Groups.BULLETS]
         val physics = physicsMapper.get(entity)

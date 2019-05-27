@@ -5,8 +5,10 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.assets.AssetManager
 import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.graphics.Fonts
+import com.spacehorde.graphics.Particles
 import com.spacehorde.scene.SceneContainer
-import com.spacehorde.scene.impl.ArenaScene
+import com.spacehorde.scene.impl.TitleScene
+import com.spacehorde.scoring.ScoreKeeper
 import com.spacehorde.service.ServiceContainer
 import com.spacehorde.service.impl.SceneContainerProvider
 import com.spacehorde.service.impl.ShapeRendererProvider
@@ -16,7 +18,7 @@ import com.spacehorde.service.service
 
 class SpaceHordeGame : ApplicationAdapter() {
     companion object {
-        var DEBUG = true
+        var DEBUG = false
 
         private const val DT = .01f
         private const val MAX_DT = 1f / 60f
@@ -29,8 +31,12 @@ class SpaceHordeGame : ApplicationAdapter() {
     override fun create() {
         Gdx.app.addLifecycleListener(ServiceContainer)
         Gdx.app.addLifecycleListener(Fonts)
+        Gdx.app.addLifecycleListener(ScoreKeeper)
+        Gdx.app.addLifecycleListener(Particles)
 
         Fonts.load()
+        ScoreKeeper.load()
+        Particles.load()
 
         registerService(AssetManager())
         registerService(SpriteBatchProvider())
@@ -38,7 +44,7 @@ class SpaceHordeGame : ApplicationAdapter() {
         registerService(SceneContainerProvider())
         registerService(CustomControllerMappings())
 
-        sceneContainer.add(ArenaScene())
+        sceneContainer.add(TitleScene())
     }
 
     override fun pause() {

@@ -2,11 +2,13 @@ package com.spacehorde.entities.generators
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.CircleShape
 import com.badlogic.gdx.physics.box2d.FixtureDef
+import com.badlogic.gdx.utils.Pools
 import com.spacehorde.Groups
 import com.spacehorde.assets.asset
 import com.spacehorde.components.*
@@ -22,19 +24,19 @@ class ShrapnelGenerator : EntityGenerator {
     private val shrapnelTexture by asset<Texture>("textures/shrapnel.png")
 
     override fun generate(engine: Engine): Entity {
-        val entity = Entity()
+        val entity = Pools.obtain(Entity::class.java)
 
-        entity.add(component<Spatial>())
-        entity.add(component<Transform> {
+        entity.add(component<Spatial>(engine))
+        entity.add(component<Transform>(engine) {
             this.origin.set(shrapnelTexture.width * .5f, shrapnelTexture.height * .5f)
         })
 
-        entity.add(component<Size> {
+        entity.add(component<Size>(engine) {
             this.width = shrapnelTexture.width.toFloat()
             this.height = shrapnelTexture.height.toFloat()
         })
 
-        entity.add(component<Box2DPhysics> {
+        entity.add(component<Box2DPhysics>(engine) {
             this.maxSpeed = 2000f
 
             this.bodyDef = BodyDef().apply {
@@ -56,10 +58,10 @@ class ShrapnelGenerator : EntityGenerator {
             })
         })
 
-        entity.add(component<GroupMask> { mask = Groups.SHRAPNEL })
-        entity.add(component<Tint>())
-        entity.add(component<RenderSprite> { sprite = Sprite(shrapnelTexture) })
-        entity.add(component<Scripted> {
+        entity.add(component<GroupMask>(engine) { mask = Groups.SHRAPNEL })
+        entity.add(component<Tint>(engine))
+        entity.add(component<RenderSprite>(engine) { sprite = Sprite(shrapnelTexture) })
+        entity.add(component<Scripted>(engine) {
             scripts.add(Rotate(BULLET_ROTATION_PER_SECOND))
             scripts.add(ShrapnelScript())
         })

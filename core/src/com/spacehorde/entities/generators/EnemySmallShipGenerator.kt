@@ -2,6 +2,8 @@ package com.spacehorde.entities.generators
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.PooledEngine
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.MathUtils
 import com.spacehorde.Groups
@@ -14,9 +16,10 @@ class EnemySmallShipGenerator : ShipGenerator() {
     private val texture by asset<Texture>("textures/enemy_small.png")
 
     override fun generate(engine: Engine): Entity {
-        val entity = createTextureShip(texture)
-        entity.add(component<GroupMask> { mask = Groups.ENEMIES })
-        if (SpaceHordeGame.DEBUG) entity.add(component<Debug>())
+
+        val entity = createTextureShip(engine, texture)
+        entity.add(component<GroupMask>(engine) { mask = Groups.ENEMIES })
+        if (SpaceHordeGame.DEBUG) entity.add(component<Debug>(engine))
 
         entity.getComponent(Box2DPhysics::class.java).apply {
             this.maxSpeed = MathUtils.random(250f, 300f)
@@ -24,8 +27,13 @@ class EnemySmallShipGenerator : ShipGenerator() {
             this.rotationSpeed = MathUtils.random(.075f, .2f)
         }
 
-        entity.add(component<Scripted> {
+        entity.add(component<Scripted>(engine) {
             scripts.add(EnemySmallScript())
+        })
+
+        entity.add(component<ScoreValue>(engine) { value = 50 })
+        entity.add(component<Meta>(engine) {
+            this.put("ShipColor", Color(1f, 102f / 255f, 102f / 255f, 1f))
         })
 
         return entity

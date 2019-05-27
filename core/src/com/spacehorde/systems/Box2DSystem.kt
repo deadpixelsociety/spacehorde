@@ -39,7 +39,6 @@ class Box2DSystem : EntitySystem(), EntityListener, ContactListener {
         box2d.body?.let {
             it.setTransform(Vector2(body.worldCenter).add(box2d.initialOffset), box2d.initialAngle)
             it.linearVelocity = Vector2(MathUtils.cos(box2d.initialAngle), MathUtils.sin(box2d.initialAngle)).scl(box2d.initialSpeed)
-            println("initialVelocity ${it.linearVelocity}")
         }
     }
 

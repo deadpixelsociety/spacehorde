@@ -9,6 +9,6 @@ fun main(args: Array<String>) {
         title = "SpaceHorde"
         width = 1280
         height = 720
-        useGL30 = true
+        useGL30 = false
     })
 }

@@ -15,12 +15,8 @@ class EnemyPinwheelScript : EnemyScript() {
 
     private val sizeMapper by mapper<Size>()
 
-    override fun update(deltaTime: Float, engine: Engine, entity: Entity): Boolean {
-        super.update(deltaTime, engine, entity)
-        return false
-    }
-
     override fun onDie(engine: Engine, entity: Entity) {
+        super.onDie(engine, entity)
         createShrapnel(engine, entity)
     }
 

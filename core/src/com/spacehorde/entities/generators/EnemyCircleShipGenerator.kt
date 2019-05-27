@@ -2,6 +2,8 @@ package com.spacehorde.entities.generators
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
+import com.badlogic.ashley.core.PooledEngine
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.math.MathUtils
 import com.spacehorde.Groups
@@ -17,9 +19,11 @@ class EnemyCircleShipGenerator : ShipGenerator() {
     private val texture by asset<Texture>("textures/enemy_circle.png")
 
     override fun generate(engine: Engine): Entity {
-        val entity = createTextureShip(texture)
-        entity.add(component<GroupMask> { mask = Groups.ENEMIES })
-        if (SpaceHordeGame.DEBUG) entity.add(component<Debug>())
+
+
+        val entity = createTextureShip(engine, texture)
+        entity.add(component<GroupMask>(engine) { mask = Groups.ENEMIES })
+        if (SpaceHordeGame.DEBUG) entity.add(component<Debug>(engine))
 
         entity.getComponent(Box2DPhysics::class.java).apply {
             this.maxSpeed = MathUtils.random(100f, 150f)
@@ -27,7 +31,7 @@ class EnemyCircleShipGenerator : ShipGenerator() {
             this.rotationSpeed = MathUtils.random(.02f, .09f)
         }
 
-        entity.add(component<Scripted> {
+        entity.add(component<Scripted>(engine) {
             scripts.add(Rotate(MathUtils.random(45f, 180f)))
             scripts.add(LoopScript().apply {
                 this.scripts.add(ScaleTween(1.25f, 1.25f, MathUtils.random(.25f, 1.25f)))
@@ -35,6 +39,11 @@ class EnemyCircleShipGenerator : ShipGenerator() {
             })
 
             scripts.add(EnemyCircleScript())
+        })
+
+        entity.add(component<ScoreValue>(engine) { value = 25 })
+        entity.add(component<Meta>(engine) {
+            this.put("ShipColor", Color(1f, 102f / 255f, 168f / 255f, 1f))
         })
 
         return entity

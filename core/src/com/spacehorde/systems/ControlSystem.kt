@@ -7,7 +7,6 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Quaternion
 import com.badlogic.gdx.math.Vector2
 import com.spacehorde.Groups
-import com.spacehorde.SpaceHordeGame
 import com.spacehorde.components.*
 import com.spacehorde.config.CustomControllerMappings
 import com.spacehorde.service.service
@@ -31,6 +30,11 @@ class ControlSystem : EntitySystem() {
     private val q1 = Quaternion()
     private var tt = 0f
     private var lastStart = 0f
+    private var bombWasPressed = false
+    private var startWasPressed = false
+
+    var bombEvent: () -> Unit = {}
+    var startEvent: () -> Unit = {}
 
     override fun update(deltaTime: Float) {
         val groupSystem = engine?.getSystem(GroupSystem::class.java) ?: return
@@ -39,20 +43,28 @@ class ControlSystem : EntitySystem() {
         val controller = Controllers.getControllers().firstOrNull() ?: return
         val mappedController = MappedController(controller, mappings)
 
-        val bomb = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_BOMB)
+        val bombPressed = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_BOMB)
         val accept = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_ACCEPT)
         val cancel = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_CANCEL)
-        val start = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_START)
+        val startPressed = mappedController.isButtonPressed(CustomControllerMappings.BUTTON_START)
 
         players.forEach { player ->
             handleMovement(mappedController, player)
             handleFiring(mappedController, player)
         }
 
-        if (start && (tt - lastStart >= 1f)) {
-            SpaceHordeGame.DEBUG = !SpaceHordeGame.DEBUG
-            lastStart = tt
+        if (startPressed && !startWasPressed) {
+            startWasPressed = true
+            startEvent.invoke()
         }
+
+        if (bombPressed && !bombWasPressed) {
+            bombWasPressed = true
+            bombEvent.invoke()
+        }
+
+        if (!bombPressed) bombWasPressed = false
+        if (!startPressed) startWasPressed = false
 
         tt += deltaTime
     }
