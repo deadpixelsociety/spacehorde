@@ -22,8 +22,8 @@ class EnemyCircleShipGenerator : ShipGenerator() {
         if (SpaceHordeGame.DEBUG) entity.add(component<Debug>())
 
         entity.getComponent(Box2DPhysics::class.java).apply {
-            this.maxSpeed = MathUtils.random(25f, 50f)
-            this.accelerationSpeed = MathUtils.random(100f, 300f)
+            this.maxSpeed = MathUtils.random(100f, 150f)
+            this.accelerationSpeed = MathUtils.random(200f, 400f)
             this.rotationSpeed = MathUtils.random(.02f, .09f)
         }
 

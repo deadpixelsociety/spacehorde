@@ -12,10 +12,13 @@ import com.badlogic.gdx.utils.viewport.FillViewport
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.spacehorde.Groups
 import com.spacehorde.SpaceHordeGame
-import com.spacehorde.components.Transform
+import com.spacehorde.components.Box2DPhysics
 import com.spacehorde.components.mapper
 import com.spacehorde.entities.Entities
 import com.spacehorde.entities.spawners.EnemyCircleSpawner
+import com.spacehorde.entities.spawners.EnemyCrossSpawner
+import com.spacehorde.entities.spawners.EnemyPinwheelSpawner
+import com.spacehorde.entities.spawners.EnemySmallSpawner
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneImpl
 import com.spacehorde.service.service
@@ -30,7 +33,7 @@ class ArenaScene : SceneImpl() {
     private val viewport by lazy { FillViewport(600f, 600f) }
     private val uiViewport by lazy { ScreenViewport() }
     private val batch by service<SpriteBatch>()
-    private val transformMapper by mapper<Transform>()
+    private val physicsMapper by mapper<Box2DPhysics>()
     private val playerPos = Vector2()
     private val spawnPos = Vector2()
     private val spawnCircle = Circle()
@@ -51,18 +54,45 @@ class ArenaScene : SceneImpl() {
         engine.getSystem(Box2DSystem::class.java).update(1f)
     }
 
+    private fun calcSpawnPos(radius: Float) {
+        var attempts = 10
+        val expanded = radius * 1.1f
+        val hw = ARENA_SIZE * .5f - expanded
+        spawnPos.set(MathUtils.random(-hw, hw), MathUtils.random(-hw, hw))
+        spawnCircle.set(spawnPos, expanded * 1.1f)
+        while (spawnCircle.contains(playerPos) && attempts > 0) {
+            spawnPos.set(MathUtils.random(-hw, hw), MathUtils.random(-hw, hw))
+            spawnCircle.set(spawnPos, expanded * 1.1f)
+            attempts--
+        }
+    }
+
+    private fun spawnCrosses() {
+        calcPlayerPosition()
+        val spawnRadius = 50f
+        calcSpawnPos(spawnRadius)
+        EnemyCrossSpawner(spawnPos, spawnRadius).spawn(engine, MathUtils.random(5, 12))
+    }
+
     private fun spawnCircles() {
         calcPlayerPosition()
         val spawnRadius = 50f
-        val hw = ARENA_SIZE * .5f - spawnRadius
-        spawnPos.set(MathUtils.random(-hw, hw), MathUtils.random(-hw, hw))
-        spawnCircle.set(spawnPos, spawnRadius * 1.1f)
-        while (spawnCircle.contains(playerPos)) {
-            spawnPos.set(MathUtils.random(-hw, hw), MathUtils.random(-hw, hw))
-            spawnCircle.set(spawnPos, spawnRadius * 1.1f)
-        }
-
+        calcSpawnPos(spawnRadius)
         EnemyCircleSpawner(spawnPos, spawnRadius).spawn(engine, MathUtils.random(3, 6))
+    }
+
+    private fun spawnSmall() {
+        calcPlayerPosition()
+        val spawnRadius = 50f
+        calcSpawnPos(spawnRadius)
+        EnemySmallSpawner(spawnPos, spawnRadius).spawn(engine, MathUtils.random(5, 10))
+    }
+
+    private fun spawnPinwheels() {
+        calcPlayerPosition()
+        val spawnRadius = 50f
+        calcSpawnPos(spawnRadius)
+        EnemyPinwheelSpawner(spawnPos, spawnRadius).spawn(engine, MathUtils.random(1, 1))
     }
 
     private fun createSystems() {
@@ -91,7 +121,14 @@ class ArenaScene : SceneImpl() {
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
             spawnCircles()
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
+            spawnSmall()
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
+            spawnCrosses()
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
+            spawnPinwheels()
         }
+
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE)) {
             engine.getSystem(GroupSystem::class.java)[Groups.ENEMIES].forEach { engine.removeEntity(it) }
@@ -104,9 +141,10 @@ class ArenaScene : SceneImpl() {
         var py = 0f
 
         players.forEach {
-            val transform = transformMapper.get(it)
-            px += transform.position.x
-            py += transform.position.y
+            val physics = physicsMapper.get(it)
+            val body = physics.body
+            px += body?.worldCenter?.x ?: 0f
+            py += body?.worldCenter?.y ?: 0f
         }
 
         if (players.isNotEmpty()) {

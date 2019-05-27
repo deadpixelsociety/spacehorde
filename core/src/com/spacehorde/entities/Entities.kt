@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.CircleShape
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
@@ -17,6 +18,7 @@ object Entities {
     private const val PLAYER = "player"
     private const val WALL = "wall"
     private const val BULLET = "bullet"
+    private const val SHRAPNEL = "shrapnel"
     private const val ENEMY_CIRCLE = "enemy_circle"
     private const val ENEMY_CROSS = "enemy_cross"
     private const val ENEMY_DIAMOND = "enemy_diamond"
@@ -29,6 +31,7 @@ object Entities {
         generators.put(PLAYER, PlayerShipGenerator())
         generators.put(WALL, WallGenerator())
         generators.put(BULLET, BulletGenerator())
+        generators.put(SHRAPNEL, ShrapnelGenerator())
         generators.put(ENEMY_CIRCLE, EnemyCircleShipGenerator())
         generators.put(ENEMY_CROSS, EnemyCrossShipGenerator())
         generators.put(ENEMY_DIAMOND, EnemyDiamondShipGenerator())
@@ -56,14 +59,22 @@ object Entities {
     }
 
     fun enemyPinwheel(engine: Engine): Entity {
-        return enemy(engine, ENEMY_PINWHEEL)
+        return enemy(engine, ENEMY_PINWHEEL) {
+            getComponent(Box2DPhysics::class.java).apply {
+                bodyDef.type = BodyDef.BodyType.StaticBody
+
+                fixtureDefs[0].apply {
+                    this.isSensor = true
+                }
+            }
+        }
     }
 
     fun enemySmall(engine: Engine): Entity {
         return enemy(engine, ENEMY_SMALL)
     }
 
-    private fun enemy(engine: Engine, type: String): Entity {
+    private fun enemy(engine: Engine, type: String, init: (Entity.() -> Unit)? = null): Entity {
         return get(type, engine) {
             getComponent(Box2DPhysics::class.java).apply {
                 fixtureDefs[0].apply {
@@ -71,6 +82,8 @@ object Entities {
                     this.filter.maskBits = Groups.WALLS.or(Groups.BULLETS).or(Groups.ENEMIES).or(Groups.PLAYERS)
                 }
             }
+
+            if (init != null) this.init()
         }
     }
 
@@ -85,7 +98,7 @@ object Entities {
 
                 fixtureDefs[0].apply {
                     this.filter.categoryBits = Groups.PLAYERS
-                    this.filter.maskBits = Groups.ENEMIES.or(Groups.WALLS).or(Groups.PLAYERS)
+                    this.filter.maskBits = Groups.ENEMIES.or(Groups.WALLS).or(Groups.PLAYERS).or(Groups.SHRAPNEL)
                 }
             }
         }
@@ -121,6 +134,18 @@ object Entities {
         }
     }
 
+    fun shrapnel(engine: Engine, x: Float, y: Float): Entity {
+        return get(SHRAPNEL, engine) {
+            getComponent(Transform::class.java).apply {
+                this.position.set(x, y)
+            }
+
+            getComponent(Box2DPhysics::class.java).apply {
+                this.bodyDef.position.set(x, y)
+            }
+        }
+    }
+
     fun wall(engine: Engine, x: Float, y: Float, width: Float, height: Float): Entity {
         return get(WALL, engine) {
             val hw = width * .5f
@@ -147,7 +172,7 @@ object Entities {
 
                 fixtureDefs.add(FixtureDef().apply {
                     this.filter.categoryBits = Groups.WALLS
-                    this.filter.maskBits = Groups.ENEMIES.or(Groups.PLAYERS).or(Groups.BULLETS)
+                    this.filter.maskBits = Groups.ENEMIES.or(Groups.PLAYERS).or(Groups.BULLETS).or(Groups.SHRAPNEL)
 
                     this.shape = PolygonShape().apply {
                         setAsBox(hw, hh, Vector2(hw, hh), 0f)

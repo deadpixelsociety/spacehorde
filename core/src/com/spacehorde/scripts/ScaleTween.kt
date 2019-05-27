@@ -12,7 +12,9 @@ class ScaleTween() : TweenScript<Vector2>() {
     companion object {
         // Simple linear tween
         val DEFAULT_TWEEN: Tween<Vector2> = { start, end, t ->
-            v0.set(start).nor().setLength(Interpolation.linear.apply(start.len(), end.len(), t))
+            val lx = Interpolation.linear.apply(start.x, end.x, t)
+            val ly = Interpolation.linear.apply(start.y, end.y, t)
+            v0.set(lx, ly)
         }
 
         private val v0 = Vector2()

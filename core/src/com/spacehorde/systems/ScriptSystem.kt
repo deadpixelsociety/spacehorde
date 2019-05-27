@@ -18,7 +18,7 @@ class ScriptSystem : IteratingSystem(Family.all(Scripted::class.java).get()) {
                 it.started = true
             }
 
-            if (it.update(deltaTime, engine, entity)) {
+            if (it.finished || it.update(deltaTime, engine, entity)) {
                 scripted.scripts.removeValue(it, true)
                 it.finish(engine, entity)
             }

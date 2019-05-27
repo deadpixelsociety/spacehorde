@@ -6,7 +6,7 @@ import com.spacehorde.Groups
 import com.spacehorde.components.*
 import com.spacehorde.scripts.Script
 
-class BulletScript : Script() {
+class ShrapnelScript : Script() {
     private val physicsMapper by mapper<Box2DPhysics>()
     private val groupMapper by mapper<GroupMask>()
 
@@ -16,8 +16,9 @@ class BulletScript : Script() {
         if (physics.collision) {
             val collidedGroup = groupMapper.get(physics.collided)
             if (collidedGroup.match(Groups.WALLS)) {
-                die(entity)
-            } else if (collidedGroup.match(Groups.ENEMIES)) {
+                entity.add(component<Dead>())
+                // TODO: particles, sounds!
+            } else if (collidedGroup.match(Groups.PLAYERS)) {
                 physics.collided?.add(component<Dying>())
             }
         }

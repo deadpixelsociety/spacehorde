@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.*
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.*
+import com.spacehorde.Groups
 import com.spacehorde.components.*
 import com.spacehorde.components.Transform
 import com.spacehorde.gdxArray
@@ -17,6 +18,7 @@ class Box2DSystem : EntitySystem(), EntityListener, ContactListener {
 
     private val transformMapper by mapper<Transform>()
     private val physicsMapper by mapper<Box2DPhysics>()
+    private val groupMapper by mapper<GroupMask>()
     private val bodyList = gdxArray<Body>()
     private val bodiesToRemove = mutableListOf<Body>()
     private val v0 = Vector2()
@@ -111,9 +113,11 @@ class Box2DSystem : EntitySystem(), EntityListener, ContactListener {
         bodyList.forEach { body ->
             val entity = body.userData as Entity
             val transform = transformMapper.get(entity)
-            val physics = physicsMapper.get(entity)
+            val group = groupMapper.get(entity)
+            val physics = physicsMapper.get(entity) ?: return
 
-            if (physics.manualVelocity) {
+            // Don't move spawning entities
+            if (physics.manualVelocity && group?.match(Groups.SPAWNING) == false) {
                 v0.set(physics.acceleration).scl(deltaTime)
 
                 v1.set(0f, 0f)

@@ -7,10 +7,8 @@ import com.badlogic.gdx.math.MathUtils
 import com.spacehorde.Groups
 import com.spacehorde.SpaceHordeGame
 import com.spacehorde.assets.asset
-import com.spacehorde.components.Box2DPhysics
-import com.spacehorde.components.Debug
-import com.spacehorde.components.GroupMask
-import com.spacehorde.components.component
+import com.spacehorde.components.*
+import com.spacehorde.scripts.impl.EnemySmallScript
 
 class EnemySmallShipGenerator : ShipGenerator() {
     private val texture by asset<Texture>("textures/enemy_small.png")
@@ -21,10 +19,14 @@ class EnemySmallShipGenerator : ShipGenerator() {
         if (SpaceHordeGame.DEBUG) entity.add(component<Debug>())
 
         entity.getComponent(Box2DPhysics::class.java).apply {
-            this.maxSpeed = MathUtils.random(200f, 300f)
+            this.maxSpeed = MathUtils.random(250f, 300f)
             this.accelerationSpeed = MathUtils.random(400f, 600f)
-            this.rotationSpeed = MathUtils.random(.02f, .09f)
+            this.rotationSpeed = MathUtils.random(.075f, .2f)
         }
+
+        entity.add(component<Scripted> {
+            scripts.add(EnemySmallScript())
+        })
 
         return entity
     }

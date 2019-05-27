@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool
 
 abstract class Script : Pool.Poolable {
     var started = false
+    var finished = false
 
     open fun start(engine: Engine, entity: Entity) {
     }
@@ -17,5 +18,6 @@ abstract class Script : Pool.Poolable {
 
     override fun reset() {
         started = false
+        finished = false
     }
 }

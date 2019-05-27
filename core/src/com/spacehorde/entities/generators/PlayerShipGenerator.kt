@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.spacehorde.Groups
 import com.spacehorde.SpaceHordeGame
 import com.spacehorde.components.*
+import com.spacehorde.scripts.impl.PlayerScript
 import com.spacehorde.ships.PlayerShipMask
 import com.spacehorde.weapons.DoubleBullet
 
@@ -21,6 +22,10 @@ class PlayerShipGenerator : ShipGenerator() {
             this.accelerationSpeed = MathUtils.random(400f, 600f)
             this.rotationSpeed = MathUtils.random(.02f, .09f)
         }
+
+        entity.add(component<Scripted> {
+            this.scripts.add(PlayerScript())
+        })
 
         return entity
     }

@@ -16,7 +16,6 @@ class GraveyardSystem : IteratingSystem(Family.all(Dead::class.java).get()) {
 
     override fun processEntity(entity: Entity?, deltaTime: Float) {
         if (entity == null) return
-        println("$entity is dead")
         entitiesToRemove.add(entity)
     }
 }
