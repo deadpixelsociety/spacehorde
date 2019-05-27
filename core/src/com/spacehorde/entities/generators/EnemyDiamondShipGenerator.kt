@@ -7,10 +7,9 @@ import com.badlogic.gdx.math.MathUtils
 import com.spacehorde.Groups
 import com.spacehorde.SpaceHordeGame
 import com.spacehorde.assets.asset
-import com.spacehorde.components.Box2DPhysics
-import com.spacehorde.components.Debug
-import com.spacehorde.components.GroupMask
-import com.spacehorde.components.component
+import com.spacehorde.components.*
+import com.spacehorde.scripts.Rotate
+import com.spacehorde.scripts.impl.EnemyDiamondScript
 
 class EnemyDiamondShipGenerator : ShipGenerator() {
     private val texture by asset<Texture>("textures/enemy_diamond.png")
@@ -25,6 +24,11 @@ class EnemyDiamondShipGenerator : ShipGenerator() {
             this.accelerationSpeed = MathUtils.random(400f, 600f)
             this.rotationSpeed = MathUtils.random(.02f, .09f)
         }
+
+        entity.add(component<Scripted> {
+            this.scripts.add(Rotate(MathUtils.random(90f, 720f)))
+            this.scripts.add(EnemyDiamondScript())
+        })
 
         return entity
     }

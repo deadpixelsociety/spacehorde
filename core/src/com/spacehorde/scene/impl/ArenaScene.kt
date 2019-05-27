@@ -15,10 +15,7 @@ import com.spacehorde.SpaceHordeGame
 import com.spacehorde.components.Box2DPhysics
 import com.spacehorde.components.mapper
 import com.spacehorde.entities.Entities
-import com.spacehorde.entities.spawners.EnemyCircleSpawner
-import com.spacehorde.entities.spawners.EnemyCrossSpawner
-import com.spacehorde.entities.spawners.EnemyPinwheelSpawner
-import com.spacehorde.entities.spawners.EnemySmallSpawner
+import com.spacehorde.entities.spawners.*
 import com.spacehorde.graphics.Fonts
 import com.spacehorde.scene.SceneImpl
 import com.spacehorde.service.service
@@ -92,7 +89,14 @@ class ArenaScene : SceneImpl() {
         calcPlayerPosition()
         val spawnRadius = 50f
         calcSpawnPos(spawnRadius)
-        EnemyPinwheelSpawner(spawnPos, spawnRadius).spawn(engine, MathUtils.random(1, 1))
+        EnemyPinwheelSpawner(spawnPos, spawnRadius).spawn(engine, MathUtils.random(1, 3))
+    }
+
+    private fun spawnDiamonds() {
+        calcPlayerPosition()
+        val spawnRadius = 50f
+        calcSpawnPos(spawnRadius)
+        EnemyDiamondSpawner(spawnPos, spawnRadius).spawn(engine, MathUtils.random(5, 10))
     }
 
     private fun createSystems() {
@@ -127,6 +131,8 @@ class ArenaScene : SceneImpl() {
             spawnCrosses()
         } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
             spawnPinwheels()
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_5)) {
+            spawnDiamonds()
         }
 
 
